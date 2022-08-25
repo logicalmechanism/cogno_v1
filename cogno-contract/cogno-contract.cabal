@@ -46,6 +46,8 @@ library
   hs-source-dirs:       src
 
   exposed-modules:      CognoContract
+                        CognoDataType
+                        HelperFunctions
 
   build-depends:        bytestring
                       , cardano-api

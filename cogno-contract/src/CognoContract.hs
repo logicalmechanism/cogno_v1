@@ -37,7 +37,10 @@ import qualified Data.ByteString.Lazy           as LBS
 import qualified Data.ByteString.Short          as SBS
 import qualified Plutus.V1.Ledger.Scripts       as Scripts
 import qualified Plutus.V2.Ledger.Api           as PlutusV2
+import qualified Plutus.V2.Ledger.Contexts      as ContextsV2
 import           Plutus.Script.Utils.V2.Scripts as Utils
+import CognoDataType
+import HelperFunctions
 {- |
   Author   : The Ancient Kraken
   Copyright: 2022
@@ -51,21 +54,89 @@ import           Plutus.Script.Utils.V2.Scripts as Utils
   The Glorious Glasgow Haskell Compilation System, version 8.10.7
 -}
 -------------------------------------------------------------------------------
--- | Create the datum parameters data object.
+-- | Create the datum type.
 -------------------------------------------------------------------------------
-data CustomDatumType = CustomDatumType {}
-PlutusTx.unstableMakeIsData ''CustomDatumType
+data CustomDatumType = Cogno CognoData
+PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno, 0 ) ]
 -------------------------------------------------------------------------------
 -- | Create the redeemer type.
 -------------------------------------------------------------------------------
-data CustomRedeemerType =  CustomRedeemerType {}
-PlutusTx.unstableMakeIsData ''CustomRedeemerType
+data CustomRedeemerType = Remove | 
+                          Update
+PlutusTx.makeIsDataIndexed ''CustomRedeemerType [ ( 'Remove, 0 )
+                                                , ( 'Update, 1 )
+                                                ]
 -------------------------------------------------------------------------------
 -- | mkValidator :: Datum -> Redeemer -> ScriptContext -> Bool
 -------------------------------------------------------------------------------
 {-# INLINABLE mkValidator #-}
 mkValidator :: CustomDatumType -> CustomRedeemerType -> PlutusV2.ScriptContext -> Bool
-mkValidator _ _ _ = True
+mkValidator datum redeemer context =
+  case datum of
+    (Cogno cd) ->
+      let userPkh = cdPkh cd
+          userAddr = createAddress userPkh (cdSc cd)
+      in case redeemer of
+        -- leave the contract
+        Remove -> do
+          { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"   $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          ;         traceIfFalse "Remove Error"     $ all (==(True :: Bool)) [a,b,c]
+          }
+
+        -- update the datum
+        Update ->
+          case getOutboundDatum contTxOutputs validatingValue of
+            Nothing            -> False
+            Just outboundDatum ->
+              case outboundDatum of
+                (Cogno cd') -> do
+                  { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"  $ updateCognoData cd cd'                             -- the datum changes correctly
+                  ;         traceIfFalse "Update Error"     $ all (==(True :: Bool)) [a,b,c]
+                  }
+  where
+    info :: PlutusV2.TxInfo
+    info = ContextsV2.scriptContextTxInfo  context
+
+    -- | in / outs
+    txInputs :: [PlutusV2.TxInInfo]
+    txInputs = PlutusV2.txInfoInputs info
+
+    contTxOutputs :: [PlutusV2.TxOut]
+    contTxOutputs = ContextsV2.getContinuingOutputs context
+
+    txOutputs :: [PlutusV2.TxOut]
+    txOutputs = ContextsV2.txInfoOutputs info
+
+    -- | the value being spent by this tx
+    validatingValue :: PlutusV2.Value
+    validatingValue =
+      case ContextsV2.findOwnInput context of
+        Nothing    -> traceError "" -- This error should never be hit.
+        Just input -> PlutusV2.txOutValue $ PlutusV2.txInInfoResolved input
+    
+    -- | Get the inline datum that holds a value from a list of tx outs.
+    getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType
+    getOutboundDatum []     _ = Nothing
+    getOutboundDatum (x:xs) val =
+      if PlutusV2.txOutValue x == val -- strict value continue
+        then
+          case PlutusV2.txOutDatum x of
+            PlutusV2.NoOutputDatum       -> Nothing -- forbid null datums
+            (PlutusV2.OutputDatumHash _) -> Nothing -- forbid embedded datums
+            
+            -- inline datum only
+            (PlutusV2.OutputDatum (PlutusV2.Datum d)) -> 
+              case PlutusTx.fromBuiltinData d of
+                Nothing     -> getOutboundDatum xs val
+                Just inline -> Just $ PlutusTx.unsafeFromBuiltinData @CustomDatumType inline
+        
+        -- just loop if bad value
+        else getOutboundDatum xs val
+-- end of mkValidator
 -------------------------------------------------------------------------------
 -- | Now we need to compile the Validator.
 -------------------------------------------------------------------------------
