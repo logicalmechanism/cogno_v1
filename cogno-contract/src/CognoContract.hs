@@ -39,8 +39,8 @@ import qualified Plutus.V1.Ledger.Scripts       as Scripts
 import qualified Plutus.V2.Ledger.Api           as PlutusV2
 import qualified Plutus.V2.Ledger.Contexts      as ContextsV2
 import           Plutus.Script.Utils.V2.Scripts as Utils
-import CognoDataType
-import HelperFunctions
+import           CognoDataType
+import           HelperFunctions
 {- |
   Author   : The Ancient Kraken
   Copyright: 2022
