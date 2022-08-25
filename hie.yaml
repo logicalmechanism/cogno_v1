@@ -1,0 +1,4 @@
+cradle:
+  cabal:
+    - path: "./cogno-contract/src"
+      component: "cogno-contract:lib:cogno-contract"
