@@ -5,31 +5,27 @@ set -e
 export CARDANO_NODE_SOCKET_PATH=$(cat path_to_socket.sh)
 cli=$(cat path_to_cli.sh)
 script_path="../cogno-contract/cogno-contract.plutus"
-TESTNET_MAGIC=$(cat data/testnet.magic)
+testnet_magic=$(cat data/testnet.magic)
 
 # Addresses
-script_address=$(${cli} address build --payment-script-file ${script_path} --testnet-magic ${TESTNET_MAGIC})
+script_address=$(${cli} address build --payment-script-file ${script_path} --testnet-magic ${testnet_magic})
 issuer_address=$(cat wallets/seller-wallet/payment.addr)
 issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
 
-reference_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/reference-wallet/payment.vkey)
-
-lock_value=10000000
-
-sc_address_out="${script_address} + ${lock_value}"
-echo "Script OUTPUT: "${sc_address_out}
+issuer_address_out="${issuer_address} + 2000000"
+echo "Issuer OUTPUT: "${issuer_address_out}
 #
 # exit
 #
 echo -e "\033[0;36m Gathering UTxO Information  \033[0m"
 ${cli} query utxo \
-    --testnet-magic ${TESTNET_MAGIC} \
+    --testnet-magic ${testnet_magic} \
     --address ${issuer_address} \
     --out-file tmp/issuer_utxo.json
 
 TXNS=$(jq length tmp/issuer_utxo.json)
 if [ "$TXNS" -eq "0" ]; then
-   echo -e "\n \033[0;31m NO UTxOs Found At ${vestor_address} \033[0m \n";
+   echo -e "\n \033[0;31m NO UTxOs Found At ${issuer_address} \033[0m \n";
    exit;
 fi
 alltxin=""
@@ -41,7 +37,7 @@ issuer_tx_in=${TXIN::-8}
 echo -e "\033[0;36m Gathering Script UTxO Information  \033[0m"
 ${cli} query utxo \
     --address ${script_address} \
-    --testnet-magic ${TESTNET_MAGIC} \
+    --testnet-magic ${testnet_magic} \
     --out-file tmp/script_utxo.json
 # transaction variables
 TXNS=$(jq length tmp/script_utxo.json)
@@ -54,7 +50,8 @@ TXIN=$(jq -r --arg alltxin "" 'keys[] | . + $alltxin + " --tx-in"' tmp/script_ut
 script_tx_in=${TXIN::-8}
 
 script_ref_utxo=$(${cli} transaction txid --tx-file tmp/tx-reference-utxo.signed)
-cogno_utxo=$(${cli} transaction txid --tx-file tmp/cogno-tx.signed)
+
+tag_utxo=$(${cli} transaction txid --tx-file tmp/tag-tx.signed)
 
 # collat info
 collat_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/collat-wallet/payment.vkey)
@@ -68,16 +65,15 @@ FEE=$(${cli} transaction build \
     --change-address ${issuer_address} \
     --tx-in ${issuer_tx_in} \
     --tx-in-collateral="${collat_utxo}#0" \
-    --tx-in="${cogno_utxo}#1" \
+    --tx-in="${tag_utxo}#1" \
     --spending-tx-in-reference="${script_ref_utxo}#1" \
     --spending-plutus-script-v2 \
     --spending-reference-tx-in-inline-datum-present \
-    --spending-reference-tx-in-redeemer-file data/redeemer/update_redeemer.json \
-    --tx-out="${sc_address_out}" \
-    --tx-out-inline-datum-file data/datum/cogno_datum.json \
+    --spending-reference-tx-in-redeemer-file data/redeemer/remove_redeemer.json \
+    --tx-out="${issuer_address_out}" \
     --required-signer-hash ${issuer_pkh} \
     --required-signer-hash ${collat_pkh} \
-    --testnet-magic ${TESTNET_MAGIC})
+    --testnet-magic ${testnet_magic})
 
 IFS=':' read -ra VALUE <<< "$FEE"
 IFS=' ' read -ra FEE <<< "${VALUE[1]}"
@@ -91,12 +87,12 @@ ${cli} transaction sign \
     --signing-key-file wallets/seller-wallet/payment.skey \
     --signing-key-file wallets/collat-wallet/payment.skey \
     --tx-body-file tmp/tx.draft \
-    --out-file tmp/cogno-tx.signed \
-    --testnet-magic ${TESTNET_MAGIC}
+    --out-file tmp/tx.signed \
+    --testnet-magic ${testnet_magic}
 #
 # exit
 #
 echo -e "\033[0;36m Submitting \033[0m"
 ${cli} transaction submit \
-    --testnet-magic ${TESTNET_MAGIC} \
-    --tx-file tmp/cogno-tx.signed
+    --testnet-magic ${testnet_magic} \
+    --tx-file tmp/tx.signed

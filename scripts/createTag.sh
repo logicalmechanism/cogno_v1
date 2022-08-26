@@ -13,7 +13,7 @@ script_address=$(${cli} address build --payment-script-file ${script_path} --tes
 #
 issuer_address=$(cat wallets/seller-wallet/payment.addr)
 
-lock_value=10000000
+lock_value=2000000
 sc_address_out="${script_address} + ${lock_value}"
 
 echo "Script OUTPUT: "${sc_address_out}
@@ -42,7 +42,7 @@ FEE=$(${cli} transaction build \
     --change-address ${issuer_address} \
     --tx-in ${issuer_tx_in} \
     --tx-out="${sc_address_out}" \
-    --tx-out-inline-datum-file data/datum/cogno_datum.json \
+    --tx-out-inline-datum-file data/datum/tag_datum.json \
     --testnet-magic ${testnet_magic})
 
 IFS=':' read -ra VALUE <<< "$FEE"
@@ -56,7 +56,7 @@ echo -e "\033[0;36m Signing Tx \033[0m"
 ${cli} transaction sign \
     --signing-key-file wallets/seller-wallet/payment.skey \
     --tx-body-file tmp/tx.draft \
-    --out-file tmp/cogno-tx.signed \
+    --out-file tmp/tag-tx.signed \
     --testnet-magic ${testnet_magic}
 #
 # exit
@@ -64,4 +64,4 @@ ${cli} transaction sign \
 echo -e "\033[0;36m Submitting Tx \033[0m"
 ${cli} transaction submit \
     --testnet-magic ${testnet_magic} \
-    --tx-file tmp/cogno-tx.signed
+    --tx-file tmp/tag-tx.signed

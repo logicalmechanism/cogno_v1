@@ -9,8 +9,8 @@ TESTNET_MAGIC=$(cat data/testnet.magic)
 
 # Addresses
 script_address=$(${cli} address build --payment-script-file ${script_path} --testnet-magic ${TESTNET_MAGIC})
-issuer_address=$(cat wallets/seller-wallet/payment.addr)
-issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
+issuer_address=$(cat wallets/buyer-wallet/payment.addr)
+issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/buyer-wallet/payment.vkey)
 
 reference_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/reference-wallet/payment.vkey)
 
@@ -72,7 +72,7 @@ FEE=$(${cli} transaction build \
     --spending-tx-in-reference="${script_ref_utxo}#1" \
     --spending-plutus-script-v2 \
     --spending-reference-tx-in-inline-datum-present \
-    --spending-reference-tx-in-redeemer-file data/redeemer/update_redeemer.json \
+    --spending-reference-tx-in-redeemer-file data/redeemer/kudos_redeemer.json \
     --tx-out="${sc_address_out}" \
     --tx-out-inline-datum-file data/datum/cogno_datum.json \
     --required-signer-hash ${issuer_pkh} \
@@ -88,7 +88,7 @@ echo -e "\033[1;32m Fee: \033[0m" $FEE
 #
 echo -e "\033[0;36m Signing \033[0m"
 ${cli} transaction sign \
-    --signing-key-file wallets/seller-wallet/payment.skey \
+    --signing-key-file wallets/buyer-wallet/payment.skey \
     --signing-key-file wallets/collat-wallet/payment.skey \
     --tx-body-file tmp/tx.draft \
     --out-file tmp/cogno-tx.signed \
