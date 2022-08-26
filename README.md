@@ -18,7 +18,7 @@ A smart contract for UTxO based wallet cognomens. Each UTxO is a wallet identifi
 
 A user is always in control of their cognomen. If the public key hash is present upon removal then the user may do as they wish with their Cogno deposit. A user can update their Cogno data at any time. The ownership of the UTxO must remain the same but the utxo owner may change any other data in the datum.
 
-The primary use case of this contract is for reference. This contract will contain information with known wallet information. Currently, the data structure just contains a Cogno attached to some wallet address. In the future, the Cogno data will expand and more data structures will become available for use.
+The primary use case of this contract is for reference. This contract will contain information with known wallet information.
 
 ## The basic Cogno
 
@@ -33,6 +33,7 @@ data CognoData = CognoData
   -- ^ The stake hash of the wallet.
   , cdCogno :: PlutusV2.BuiltinByteString
   -- ^ The cognomen of the wallet.
+  ...
   }
 ```
 
@@ -68,15 +69,26 @@ For this example address, the datum will become
           "bytes": "5b7e1c5c4098962aca148e279363cc09e681268a5995d9d226e93b5d"
         },
         {
+          "int": 0
+        },
+        {
           "bytes": "546865416e6369656e744b72616b656e"
+        },
+        {
+          "list": []
+        },
+        {
+          "list": []
+        },
+        {
+          "bytes": ""
         }
       ]
     }
   ]
 }
 ```
-
-The last line is the wallet address's Cogno, "TheAncientKraken" in the example above, in hex.
+The other information contained in the datum are for holding information to create a custom profile for the cogno.
 
 ## Use Case
 

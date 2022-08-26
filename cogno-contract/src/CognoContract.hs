@@ -83,7 +83,7 @@ mkValidator datum redeemer context =
   case datum of
     -- the tag state
     (Tag td) ->
-      let userPkh = tPkh td
+      let userPkh  = tPkh td
           userAddr = createAddress userPkh (tSc td)
       in case redeemer of
         -- remove utxo from the contract
@@ -91,7 +91,7 @@ mkValidator datum redeemer context =
           { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
           ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
           ; let c = traceIfFalse "Value Not Paid"   $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
-          ;         traceIfFalse "Remove Error"     $ all (==(True :: Bool)) [a,b,c]
+          ;         traceIfFalse "Tag Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
         
         -- update the utxo datum
@@ -104,7 +104,7 @@ mkValidator datum redeemer context =
                   { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
                   ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
                   ; let c = traceIfFalse "Incorrect Datum"  $ updateTagData td td'                               -- the datum changes correctly
-                  ;         traceIfFalse "Update Error"     $ all (==(True :: Bool)) [a,b,c]
+                  ;         traceIfFalse "Tag Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
 
                 -- only tag
@@ -114,7 +114,7 @@ mkValidator datum redeemer context =
 
     -- the cogno state
     (Cogno cd) ->
-      let userPkh = cdPkh cd
+      let userPkh  = cdPkh cd
           userAddr = createAddress userPkh (cdSc cd)
       in case redeemer of
         -- remove utxo from the contract
@@ -122,7 +122,7 @@ mkValidator datum redeemer context =
           { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
           ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
           ; let c = traceIfFalse "Value Not Paid"   $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
-          ;         traceIfFalse "Remove Error"     $ all (==(True :: Bool)) [a,b,c]
+          ;         traceIfFalse "Cog Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
 
         -- update the utxo datum
@@ -136,7 +136,7 @@ mkValidator datum redeemer context =
                   ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
                   ; let c = traceIfFalse "Incorrect Datum"  $ updateCognoData cd cd'                             -- the datum changes correctly
                   ; let d = traceIfFalse "Minimum Value"    $ Value.geq validatingValue minimumValue             -- Must have minimum value
-                  ;         traceIfFalse "Update Error"     $ all (==(True :: Bool)) [a,b,c,d]
+                  ;         traceIfFalse "Cog Update Error" $ all (==(True :: Bool)) [a,b,c,d]
                   }
                 
                 -- only cogno
