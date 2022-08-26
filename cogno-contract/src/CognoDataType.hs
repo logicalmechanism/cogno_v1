@@ -75,8 +75,8 @@ updateCognoData a b = ( cdPkh   a == cdPkh   b ) &&
 giveAKudo :: CognoData -> CognoData -> Bool
 giveAKudo a b = ( cdPkh       a == cdPkh    b ) &&
                 ( cdSc        a == cdSc     b ) &&
+                ( cdKudos a + 1 == cdKudos  b ) &&
                 ( cdCogno     a == cdCogno  b ) &&
                 ( cdImage     a == cdImage  b ) &&
                 ( cdDetail    a == cdDetail b ) &&
-                ( cdLocale    a == cdLocale b ) &&
-                ( cdKudos a + 1 == cdKudos  b )
+                ( cdLocale    a == cdLocale b )

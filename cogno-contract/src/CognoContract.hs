@@ -55,6 +55,8 @@ import           HelperFunctions
 
   The Glorious Glasgow Haskell Compilation System, version 8.10.7
 -}
+thresholdLovelace :: Integer
+thresholdLovelace = 10000000
 -------------------------------------------------------------------------------
 -- | Create the datum type.
 -------------------------------------------------------------------------------
@@ -119,10 +121,10 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
-          ; let c = traceIfFalse "Value Not Paid"   $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
-          ;         traceIfFalse "Cog Remove Error" $ all (==(True :: Bool)) [a,b,c]
+          { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"     $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          ;         traceIfFalse "Cogno Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
 
         -- update the utxo datum
@@ -132,11 +134,11 @@ mkValidator datum redeemer context =
             Just outboundDatum ->
               case outboundDatum of
                 (Cogno cd') -> do
-                  { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
-                  ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
-                  ; let c = traceIfFalse "Incorrect Datum"  $ updateCognoData cd cd'                             -- the datum changes correctly
-                  ; let d = traceIfFalse "Minimum Value"    $ Value.geq validatingValue minimumValue             -- Must have minimum value
-                  ;         traceIfFalse "Cog Update Error" $ all (==(True :: Bool)) [a,b,c,d]
+                  { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"    $ updateCognoData cd cd'                             -- the datum changes correctly
+                  ; let d = traceIfFalse "Minimum Value"      $ Value.geq validatingValue minimumValue             -- Must have minimum value
+                  ;         traceIfFalse "Cogno Update Error" $ all (==(True :: Bool)) [a,b,c,d]
                   }
                 
                 -- only cogno
@@ -180,7 +182,7 @@ mkValidator datum redeemer context =
     
     -- threshold ada amount to do things, 10 ada
     minimumValue :: PlutusV2.Value
-    minimumValue = Value.singleton Value.adaSymbol Value.adaToken (10000000 :: Integer)
+    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace
     
     -- | Get the inline datum that holds a value from a list of tx outs.
     getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType
