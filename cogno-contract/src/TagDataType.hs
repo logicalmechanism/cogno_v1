@@ -41,7 +41,7 @@ import qualified Plutus.V2.Ledger.Api as PlutusV2
   Copyright: 2022
 -}
 -------------------------------------------------------------------------------
--- | Create the vesting data object.
+-- | Create the tag data object.
 -------------------------------------------------------------------------------
 data TagData = TagData
   { tPkh    :: PlutusV2.PubKeyHash
@@ -52,6 +52,7 @@ data TagData = TagData
   -- ^ The tag of the message.
   , tDetail :: [PlutusV2.BuiltinByteString]
   -- ^ The details of the message.
+  -- todo add reference txid#
   }
 PlutusTx.unstableMakeIsData ''TagData
 

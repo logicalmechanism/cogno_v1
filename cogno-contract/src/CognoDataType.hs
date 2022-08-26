@@ -45,7 +45,7 @@ import qualified Plutus.V2.Ledger.Api as PlutusV2
   Copyright: 2022
 -}
 -------------------------------------------------------------------------------
--- | Create the vesting data object.
+-- | Create the cogno data object.
 -------------------------------------------------------------------------------
 data CognoData = CognoData
   { cdPkh    :: PlutusV2.PubKeyHash

@@ -152,7 +152,7 @@ mkValidator datum redeemer context =
                   { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
                   ; let b = traceIfFalse "Incorrect Datum"  $ giveAKudo cd cd'                                   -- the datum changes correctly
                   ; let c = traceIfFalse "Minimum Value"    $ Value.geq validatingValue minimumValue             -- Must have minimum value
-                  ;         traceIfFalse "Update Error"     $ all (==(True :: Bool)) [a,b,c]
+                  ;         traceIfFalse "Cog Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
                 
                 -- only cogno
