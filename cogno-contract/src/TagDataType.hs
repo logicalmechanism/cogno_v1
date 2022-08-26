@@ -31,6 +31,8 @@ module TagDataType
   , tSc
   , tTag
   , tDetail
+  , tQuoteTxId
+  , tQuoteIndex
   , updateTagData
   ) where
 import qualified PlutusTx
@@ -41,7 +43,7 @@ import qualified Plutus.V2.Ledger.Api as PlutusV2
   Copyright: 2022
 -}
 -------------------------------------------------------------------------------
--- | Create the vesting data object.
+-- | Create the tag data object.
 -------------------------------------------------------------------------------
 data TagData = TagData
   { tPkh    :: PlutusV2.PubKeyHash
@@ -52,6 +54,10 @@ data TagData = TagData
   -- ^ The tag of the message.
   , tDetail :: [PlutusV2.BuiltinByteString]
   -- ^ The details of the message.
+  , tQuoteTxId :: PlutusV2.TxId
+  -- ^ The TxId of the quote tag.
+  , tQuoteIndex :: Integer
+  -- ^ The Index of the quote tag.
   }
 PlutusTx.unstableMakeIsData ''TagData
 

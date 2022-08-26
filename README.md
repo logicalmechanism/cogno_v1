@@ -93,3 +93,7 @@ The other information contained in the datum are for holding information to crea
 ## Use Case
 
 When a wallet address is queried, the wallet address can be cross reference with datum data from this contract to relay information about that specific wallet. This behaves very similarly to already existing NFT based identification but the key difference is the updatable data and that it can be referenced on-chain. Smart contracts will now have the ability to reference a wallets Cogno and use that data in on-chain validation functions.
+
+# tag
+
+TODO

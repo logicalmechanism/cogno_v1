@@ -44,14 +44,14 @@ import qualified Plutus.V2.Ledger.Api        as PlutusV2
 createAddress :: PlutusV2.PubKeyHash -> PlutusV2.PubKeyHash -> PlutusV2.Address
 createAddress pkh sc = 
   if PlutusV2.getPubKeyHash sc == emptyByteString 
-    then PlutusV2.Address (PubKeyCredential pkh) Nothing 
-    else PlutusV2.Address (PubKeyCredential pkh) (Just $ StakingHash $ PubKeyCredential sc)
+    then PlutusV2.Address ( PubKeyCredential pkh ) Nothing 
+    else PlutusV2.Address ( PubKeyCredential pkh ) ( Just $ StakingHash $ PubKeyCredential sc )
 
 -------------------------------------------------------------------------------
 -- | Search each TxOut for an addr and value.
 -------------------------------------------------------------------------------
 isAddrGettingPaid :: [PlutusV2.TxOut] -> PlutusV2.Address -> PlutusV2.Value -> Bool
-isAddrGettingPaid []     _    _ = False
+isAddrGettingPaid []     _    _   = False
 isAddrGettingPaid (x:xs) addr val
   | checkAddr && checkVal = True
   | otherwise             = isAddrGettingPaid xs addr val
@@ -72,9 +72,9 @@ isNInputs utxos number = loopInputs utxos 0
     loopInputs []     counter = counter == number
     loopInputs (x:xs) counter = 
       case PlutusV2.txOutDatum $ PlutusV2.txInInfoResolved x of
-        PlutusV2.NoOutputDatum       -> loopInputs xs counter
-        (PlutusV2.OutputDatumHash _) -> loopInputs xs (counter + 1)
-        (PlutusV2.OutputDatum     _) -> loopInputs xs (counter + 1)
+        PlutusV2.NoOutputDatum         -> loopInputs xs   counter
+        ( PlutusV2.OutputDatumHash _ ) -> loopInputs xs ( counter + 1 )
+        ( PlutusV2.OutputDatum     _ ) -> loopInputs xs ( counter + 1 )
 
 -------------------------------------------------------------------------------
 -- | Count the number of outputs that have datums of any kind.
@@ -86,6 +86,6 @@ isNOutputs utxos number = loopInputs utxos 0
     loopInputs []     counter = counter == number
     loopInputs (x:xs) counter = 
       case PlutusV2.txOutDatum x of
-        PlutusV2.NoOutputDatum       -> loopInputs xs counter
-        (PlutusV2.OutputDatumHash _) -> loopInputs xs (counter + 1)
-        (PlutusV2.OutputDatum     _) -> loopInputs xs (counter + 1)
+        PlutusV2.NoOutputDatum         -> loopInputs xs   counter
+        ( PlutusV2.OutputDatumHash _ ) -> loopInputs xs ( counter + 1 )
+        ( PlutusV2.OutputDatum     _ ) -> loopInputs xs ( counter + 1 )
