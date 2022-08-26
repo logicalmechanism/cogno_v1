@@ -25,17 +25,13 @@
 {-# OPTIONS_GHC -fobject-code                 #-}
 {-# OPTIONS_GHC -fno-specialise               #-}
 {-# OPTIONS_GHC -fexpose-all-unfoldings       #-}
-module CognoDataType
-  ( CognoData
-  , cdPkh
-  , cdSc
-  , cdKudos
-  , cdCogno
-  , cdImage
-  , cdDetail
-  , cdLocale
-  , updateCognoData
-  , giveAKudo
+module TagDataType
+  ( TagData
+  , tPkh
+  , tSc
+  , tTag
+  , tDetail
+  , updateTagData
   ) where
 import qualified PlutusTx
 import           PlutusTx.Prelude
@@ -47,36 +43,19 @@ import qualified Plutus.V2.Ledger.Api as PlutusV2
 -------------------------------------------------------------------------------
 -- | Create the vesting data object.
 -------------------------------------------------------------------------------
-data CognoData = CognoData
-  { cdPkh    :: PlutusV2.PubKeyHash
+data TagData = TagData
+  { tPkh    :: PlutusV2.PubKeyHash
   -- ^ The public key hash of the wallet.
-  , cdSc     :: PlutusV2.PubKeyHash
+  , tSc     :: PlutusV2.PubKeyHash
   -- ^ The stake hash of the wallet.
-  , cdKudos  :: Integer
-  -- ^ The wallet's global kudos points.
-  , cdCogno  :: PlutusV2.BuiltinByteString
-  -- ^ The cognomen of the wallet.
-  , cdImage  :: [PlutusV2.BuiltinByteString]
-  -- ^ The image of the wallet.
-  , cdDetail :: [PlutusV2.BuiltinByteString]
-  -- ^ The details of the wallet.
-  , cdLocale  :: PlutusV2.BuiltinByteString
-  -- ^ The wallets locale.
+  , tTag    :: PlutusV2.BuiltinByteString
+  -- ^ The tag of the message.
+  , tDetail :: [PlutusV2.BuiltinByteString]
+  -- ^ The details of the message.
   }
-PlutusTx.unstableMakeIsData ''CognoData
+PlutusTx.unstableMakeIsData ''TagData
 
--- Owner must not change and the kudos is constant
-updateCognoData :: CognoData -> CognoData -> Bool
-updateCognoData a b = ( cdPkh   a == cdPkh   b ) &&
-                      ( cdSc    a == cdSc    b ) &&
-                      ( cdKudos a == cdKudos b )
-
--- nothing can change but the kudos by one
-giveAKudo :: CognoData -> CognoData -> Bool
-giveAKudo a b = ( cdPkh       a == cdPkh    b ) &&
-                ( cdSc        a == cdSc     b ) &&
-                ( cdCogno     a == cdCogno  b ) &&
-                ( cdImage     a == cdImage  b ) &&
-                ( cdDetail    a == cdDetail b ) &&
-                ( cdLocale    a == cdLocale b ) &&
-                ( cdKudos a + 1 == cdKudos  b )
+-- Owner must not change
+updateTagData :: TagData -> TagData -> Bool
+updateTagData a b = ( tPkh a == tPkh b ) &&
+                    ( tSc  a == tSc  b )
