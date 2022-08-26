@@ -10,11 +10,11 @@ TESTNET_MAGIC=$(cat data/testnet.magic)
 # Addresses
 script_address=$(${cli} address build --payment-script-file ${script_path} --testnet-magic ${TESTNET_MAGIC})
 issuer_address=$(cat wallets/seller-wallet/payment.addr)
-issuer_pkh=$(cardano-cli address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
+issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
 
-reference_pkh=$(cardano-cli address key-hash --payment-verification-key-file wallets/reference-wallet/payment.vkey)
+reference_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/reference-wallet/payment.vkey)
 
-lock_value=5000000
+lock_value=10000000
 
 sc_address_out="${script_address} + ${lock_value}"
 echo "Script OUTPUT: "${sc_address_out}
@@ -53,7 +53,7 @@ alltxin=""
 TXIN=$(jq -r --arg alltxin "" 'keys[] | . + $alltxin + " --tx-in"' tmp/script_utxo.json)
 script_tx_in=${TXIN::-8}
 
-script_ref_utxo=$(cardano-cli transaction txid --tx-file tmp/tx-reference-utxo.signed)
+script_ref_utxo=$(${cli} transaction txid --tx-file tmp/tx-reference-utxo.signed)
 # collat info
 collat_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/collat-wallet/payment.vkey)
 collat_utxo="10e5b05d90199da3f7cb581f00926f5003e22aac8a3d5a33607cd4c57d13aaf3" # in collat wallet
@@ -70,9 +70,9 @@ FEE=$(${cli} transaction build \
     --spending-tx-in-reference="${script_ref_utxo}#1" \
     --spending-plutus-script-v2 \
     --spending-reference-tx-in-inline-datum-present \
-    --spending-reference-tx-in-redeemer-file data/update_redeemer.json \
+    --spending-reference-tx-in-redeemer-file data/redeemer/update_redeemer.json \
     --tx-out="${sc_address_out}" \
-    --tx-out-inline-datum-file data/next_datum.json \
+    --tx-out-inline-datum-file data/datum/cogno_datum.json \
     --required-signer-hash ${issuer_pkh} \
     --required-signer-hash ${collat_pkh} \
     --testnet-magic ${TESTNET_MAGIC})
@@ -89,7 +89,7 @@ ${cli} transaction sign \
     --signing-key-file wallets/seller-wallet/payment.skey \
     --signing-key-file wallets/collat-wallet/payment.skey \
     --tx-body-file tmp/tx.draft \
-    --out-file tmp/tx.signed \
+    --out-file tmp/cogno-tx.signed \
     --testnet-magic ${TESTNET_MAGIC}
 #
 # exit
@@ -97,4 +97,4 @@ ${cli} transaction sign \
 echo -e "\033[0;36m Submitting \033[0m"
 ${cli} transaction submit \
     --testnet-magic ${TESTNET_MAGIC} \
-    --tx-file tmp/tx.signed
+    --tx-file tmp/cogno-tx.signed

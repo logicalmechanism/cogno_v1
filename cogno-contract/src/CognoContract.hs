@@ -83,7 +83,7 @@ mkValidator datum redeemer context =
   case datum of
     -- the tag state
     (Tag td) ->
-      let userPkh = tPkh td
+      let userPkh  = tPkh td
           userAddr = createAddress userPkh (tSc td)
       in case redeemer of
         -- remove utxo from the contract
@@ -114,7 +114,7 @@ mkValidator datum redeemer context =
 
     -- the cogno state
     (Cogno cd) ->
-      let userPkh = cdPkh cd
+      let userPkh  = cdPkh cd
           userAddr = createAddress userPkh (cdSc cd)
       in case redeemer of
         -- remove utxo from the contract

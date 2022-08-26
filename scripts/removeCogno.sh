@@ -10,9 +10,9 @@ testnet_magic=$(cat data/testnet.magic)
 # Addresses
 script_address=$(${cli} address build --payment-script-file ${script_path} --testnet-magic ${testnet_magic})
 issuer_address=$(cat wallets/seller-wallet/payment.addr)
-issuer_pkh=$(cardano-cli address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
+issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
 
-issuer_address_out="${issuer_address} + 5000000"
+issuer_address_out="${issuer_address} + 10000000"
 echo "Issuer OUTPUT: "${issuer_address_out}
 #
 # exit
@@ -49,7 +49,7 @@ alltxin=""
 TXIN=$(jq -r --arg alltxin "" 'keys[] | . + $alltxin + " --tx-in"' tmp/script_utxo.json)
 script_tx_in=${TXIN::-8}
 
-script_ref_utxo=$(cardano-cli transaction txid --tx-file tmp/tx-reference-utxo.signed)
+script_ref_utxo=$(${cli} transaction txid --tx-file tmp/tx-reference-utxo.signed)
 # collat info
 collat_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/collat-wallet/payment.vkey)
 collat_utxo="10e5b05d90199da3f7cb581f00926f5003e22aac8a3d5a33607cd4c57d13aaf3" # in collat wallet
@@ -66,7 +66,7 @@ FEE=$(${cli} transaction build \
     --spending-tx-in-reference="${script_ref_utxo}#1" \
     --spending-plutus-script-v2 \
     --spending-reference-tx-in-inline-datum-present \
-    --spending-reference-tx-in-redeemer-file data/remove_redeemer.json \
+    --spending-reference-tx-in-redeemer-file data/redeemer/remove_redeemer.json \
     --tx-out="${issuer_address_out}" \
     --required-signer-hash ${issuer_pkh} \
     --required-signer-hash ${collat_pkh} \
