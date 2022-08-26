@@ -31,6 +31,8 @@ module TagDataType
   , tSc
   , tTag
   , tDetail
+  , tQuoteTxId
+  , tQuoteIndex
   , updateTagData
   ) where
 import qualified PlutusTx
@@ -52,7 +54,10 @@ data TagData = TagData
   -- ^ The tag of the message.
   , tDetail :: [PlutusV2.BuiltinByteString]
   -- ^ The details of the message.
-  -- todo add reference txid#
+  , tQuoteTxId :: PlutusV2.TxId
+  -- ^ The TxId of the quote tag.
+  , tQuoteIndex :: Integer
+  -- ^ The Index of the quote tag.
   }
 PlutusTx.unstableMakeIsData ''TagData
 
