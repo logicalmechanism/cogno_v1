@@ -29,7 +29,11 @@ module CognoDataType
   ( CognoData
   , cdPkh
   , cdSc
+  , cdKudos
   , cdCogno
+  , cdImage
+  , cdDetail
+  , cdLocale
   , updateCognoData
   , giveAKudo
   ) where
@@ -56,19 +60,23 @@ data CognoData = CognoData
   -- ^ The image of the wallet.
   , cdDetail :: [PlutusV2.BuiltinByteString]
   -- ^ The details of the wallet.
+  , cdLocale  :: PlutusV2.BuiltinByteString
+  -- ^ The wallets locale.
   }
 PlutusTx.unstableMakeIsData ''CognoData
 
--- Owner must not change
+-- Owner must not change and the kudos is constant
 updateCognoData :: CognoData -> CognoData -> Bool
 updateCognoData a b = ( cdPkh   a == cdPkh   b ) &&
                       ( cdSc    a == cdSc    b ) &&
                       ( cdKudos a == cdKudos b )
 
+-- nothing can change but the kudos by one
 giveAKudo :: CognoData -> CognoData -> Bool
 giveAKudo a b = ( cdPkh       a == cdPkh    b ) &&
                 ( cdSc        a == cdSc     b ) &&
                 ( cdCogno     a == cdCogno  b ) &&
                 ( cdImage     a == cdImage  b ) &&
                 ( cdDetail    a == cdDetail b ) &&
+                ( cdLocale    a == cdLocale b ) &&
                 ( cdKudos a + 1 == cdKudos  b )

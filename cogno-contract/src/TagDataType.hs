@@ -57,5 +57,5 @@ PlutusTx.unstableMakeIsData ''TagData
 
 -- Owner must not change
 updateTagData :: TagData -> TagData -> Bool
-updateTagData a b = ( tPkh   a == tPkh   b ) &&
-                    ( tSc    a == tSc    b )
+updateTagData a b = ( tPkh a == tPkh b ) &&
+                    ( tSc  a == tSc  b )
