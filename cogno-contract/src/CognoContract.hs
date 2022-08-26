@@ -36,7 +36,7 @@ import           Cardano.Api.Shelley            ( PlutusScript (..), PlutusScrip
 import qualified Data.ByteString.Lazy           as LBS
 import qualified Data.ByteString.Short          as SBS
 import qualified Plutus.V1.Ledger.Scripts       as Scripts
-import qualified Plutus.V1.Ledger.Value       as Value
+import qualified Plutus.V1.Ledger.Value         as Value
 import qualified Plutus.V2.Ledger.Api           as PlutusV2
 import qualified Plutus.V2.Ledger.Contexts      as ContextsV2
 import           Plutus.Script.Utils.V2.Scripts as Utils
@@ -55,6 +55,9 @@ import           HelperFunctions
 
   The Glorious Glasgow Haskell Compilation System, version 8.10.7
 -}
+-------------------------------------------------------------------------------
+-- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
+-------------------------------------------------------------------------------
 thresholdLovelace :: Integer
 thresholdLovelace = 10000000
 -------------------------------------------------------------------------------
@@ -84,7 +87,7 @@ mkValidator :: CustomDatumType -> CustomRedeemerType -> PlutusV2.ScriptContext -
 mkValidator datum redeemer context =
   case datum of
     -- the tag state
-    (Tag td) ->
+    ( Tag td ) ->
       let userPkh  = tPkh td
           userAddr = createAddress userPkh (tSc td)
       in case redeemer of
@@ -102,20 +105,20 @@ mkValidator datum redeemer context =
             Nothing            -> False
             Just outboundDatum ->
               case outboundDatum of
-                (Tag td') -> do
+                ( Tag td' ) -> do
                   { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
                   ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
                   ; let c = traceIfFalse "Incorrect Datum"  $ updateTagData td td'                               -- the datum changes correctly
                   ;         traceIfFalse "Tag Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
 
-                -- only tag
+                -- only tag datum
                 _ -> False
-        -- only remove or update
+        -- only remove or update redeemers
         _ -> False
 
     -- the cogno state
-    (Cogno cd) ->
+    ( Cogno cd ) ->
       let userPkh  = cdPkh cd
           userAddr = createAddress userPkh (cdSc cd)
       in case redeemer of
@@ -133,7 +136,7 @@ mkValidator datum redeemer context =
             Nothing            -> False
             Just outboundDatum ->
               case outboundDatum of
-                (Cogno cd') -> do
+                ( Cogno cd' ) -> do
                   { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
                   ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
                   ; let c = traceIfFalse "Incorrect Datum"    $ updateCognoData cd cd'                             -- the datum changes correctly
@@ -141,7 +144,7 @@ mkValidator datum redeemer context =
                   ;         traceIfFalse "Cogno Update Error" $ all (==(True :: Bool)) [a,b,c,d]
                   }
                 
-                -- only cogno
+                -- only cogno datum
                 _ -> False
 
         -- anyone can give a kudos
@@ -150,14 +153,14 @@ mkValidator datum redeemer context =
             Nothing            -> False
             Just outboundDatum ->
               case outboundDatum of
-                (Cogno cd') -> do
+                ( Cogno cd' ) -> do
                   { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
                   ; let b = traceIfFalse "Incorrect Datum"  $ giveAKudo cd cd'                                   -- the datum changes correctly
                   ; let c = traceIfFalse "Minimum Value"    $ Value.geq validatingValue minimumValue             -- Must have minimum value
                   ;         traceIfFalse "Cog Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
                 
-                -- only cogno
+                -- only cogno datum
                 _ -> False
   where
     info :: PlutusV2.TxInfo
@@ -191,11 +194,11 @@ mkValidator datum redeemer context =
       if PlutusV2.txOutValue x == val -- strict value continue
         then
           case PlutusV2.txOutDatum x of
-            PlutusV2.NoOutputDatum       -> Nothing -- forbid null datums
-            (PlutusV2.OutputDatumHash _) -> Nothing -- forbid embedded datums
+            PlutusV2.NoOutputDatum         -> Nothing -- forbid null datums
+            ( PlutusV2.OutputDatumHash _ ) -> Nothing -- forbid embedded datums
             
             -- inline datum only
-            (PlutusV2.OutputDatum (PlutusV2.Datum d)) -> 
+            ( PlutusV2.OutputDatum ( PlutusV2.Datum d )) -> 
               case PlutusTx.fromBuiltinData d of
                 Nothing     -> getOutboundDatum xs val
                 Just inline -> Just $ PlutusTx.unsafeFromBuiltinData @CustomDatumType inline
