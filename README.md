@@ -43,13 +43,13 @@ This is all the information required to identify a wallet address with a cognome
 
 Assume the wallet address is
 
-```
+```bash
 addr1qxvlcxj3fg3jk2dp3kmkxhnx2zuv7edktk5rfy2n9juj3h2m0cw9csycjc4v59ywy7fk8nqfu6qjdzjejhvayfhf8dwsttnjt6
 ```
 
 then the hash representation is
 
-```
+```bash
 0199fc1a514a232b29a18db7635e6650b8cf65b65da83491532cb928dd5b7e1c5c4098962aca148e279363cc09e681268a5995d9d226e93b5d
 ```
 
@@ -88,7 +88,7 @@ For this example address, the datum will become
   ]
 }
 ```
-The other information contained in the datum are for holding information to create a custom profile for the cogno.
+The datum above is the default cogno profile for a new user. The other information contained in the datum are for holding information to create a custom profile for the cogno.
 
 ## Use Case
 
@@ -96,4 +96,9 @@ When a wallet address is queried, the wallet address can be cross reference with
 
 # tag
 
-TODO
+The tag data structure is designed for displaying and connecting messages on the blockchain. Similarly to the cogno data, a wallet owns the utxo that holds their message. The tag data holds a tag, a short title or label for the post, the details of the post, and if applicable a quote, atxid of a previous post. The user may decide to remove the tag after tagging or they may just update an already existing tag for new message. The message is permanent and available to all.
+
+Another user may see a tag and quote it in their own tag. This type of tag referencing is very similar to commenting to someone elses message on social media. The type of quoting system allows for a direct pointer to the utxo of a previous tag, allowing for dynamic connections to made while all being referencable on-chain.
+
+Any wallet may make a tag but if a tagger happens to have a cogno then their data will be connected and the profile will be shown with their post. This allows public profiles to exist while permitting pseudo-anonymous taggers. 
+
