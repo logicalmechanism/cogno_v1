@@ -54,7 +54,7 @@ data TagData = TagData
   -- ^ The tag of the message.
   , tDetail :: [PlutusV2.BuiltinByteString]
   -- ^ The details of the message.
-  , tQuoteTxId :: PlutusV2.TxId
+  , tQuoteTxId :: PlutusV2.BuiltinByteString
   -- ^ The TxId of the quote tag.
   , tQuoteIndex :: Integer
   -- ^ The Index of the quote tag.

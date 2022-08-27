@@ -147,7 +147,7 @@ mkValidator datum redeemer context =
                 -- only cogno datum
                 _ -> False
 
-        -- anyone can give a kudos by spending a profile back to the contract with a +1 kudos.
+        -- anyone can give a kudos by spending a profile back to the contract with a + 1 kudos.
         Kudos ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
@@ -184,9 +184,9 @@ mkValidator datum redeemer context =
         Nothing    -> traceError "" -- This error should never be hit.
         Just input -> PlutusV2.txOutValue $ PlutusV2.txInInfoResolved input
     
-    -- threshold ada amount to do things, 10 ada
+    -- | threshold ada amount to do things, 10 ada
     minimumValue :: PlutusV2.Value
-    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace -- define near top of file
+    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace -- defined near top of file
     
     -- | Get the inline datum that holds a value from a list of tx outs.
     getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType

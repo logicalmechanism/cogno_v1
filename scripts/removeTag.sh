@@ -52,7 +52,7 @@ script_tx_in=${TXIN::-8}
 script_ref_utxo=$(${cli} transaction txid --tx-file tmp/tx-reference-utxo.signed)
 
 tag_utxo=$(${cli} transaction txid --tx-file tmp/tag-tx.signed)
-
+# echo $tag_utxo
 # collat info
 collat_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/collat-wallet/payment.vkey)
 collat_utxo="10e5b05d90199da3f7cb581f00926f5003e22aac8a3d5a33607cd4c57d13aaf3" # in collat wallet
