@@ -13,7 +13,7 @@ script_address=$(${cli} address build --payment-script-file ${script_path} --tes
 #
 issuer_address=$(cat wallets/seller-wallet/payment.addr)
 
-lock_value=2000000
+lock_value=10000000
 sc_address_out="${script_address} + ${lock_value}"
 
 echo "Script OUTPUT: "${sc_address_out}

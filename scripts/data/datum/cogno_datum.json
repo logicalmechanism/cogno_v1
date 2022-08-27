@@ -14,24 +14,16 @@
           "int": 1
         },
         {
-          "bytes": "6120737472696e67"
+          "bytes": ""
         },
         {
-          "list": [
-            {
-              "bytes": "a2108b7b1704f9fe12c906096ea1634df8e089c9ccfd651abae4a439"
-            }
-          ]
+          "list": []
         },
         {
-          "list": [
-            {
-              "bytes": "a2108b7b1704f9fe12c906096ea1634df8e089c9ccfd651abae4a439"
-            }
-          ]
+          "list": []
         },
         {
-          "bytes": "736f6d65206f7468657220737472696e67"
+          "bytes": ""
         }
       ]
     }
