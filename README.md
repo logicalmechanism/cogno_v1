@@ -96,9 +96,38 @@ When a wallet address is queried, the wallet address can be cross reference with
 
 # tag
 
-The tag data structure is designed for displaying and connecting messages on the blockchain. Similarly to the cogno data, a wallet owns the utxo that holds their message. The tag data holds a tag, a short title or label for the post, the details of the post, and if applicable a quote, a txId of a previous post. The user may decide to remove the tag after tagging or they may just update an already existing tag with a new message. The message is permanent and available to all on the blockchain.
+The tag data structure is designed for displaying and connecting messages on the blockchain. Similarly to the cogno data, a wallet owns the utxo that holds their message. The tag data holds a tag, a short title or label for the post, the details of the post, and if applicable a quote, the txId information of a previous post. 
+
+```hs
+data TagData = TagData
+  { tPkh    :: PlutusV2.PubKeyHash
+  -- ^ The public key hash of the wallet.
+  , tSc     :: PlutusV2.PubKeyHash
+  -- ^ The stake hash of the wallet.
+  , tTag    :: PlutusV2.BuiltinByteString
+  -- ^ The tag of the message.
+  , tDetail :: [PlutusV2.BuiltinByteString]
+  -- ^ The details of the message.
+  , tQuoteTxId :: PlutusV2.BuiltinByteString
+  -- ^ The TxId of the quote tag.
+  , tQuoteIndex :: Integer
+  -- ^ The Index of the quote tag.
+  }
+```
+The user may decide to remove the tag after tagging or they may just update an already existing tag with a new message. The message is permanent and available to all on the blockchain.
 
 Another user may see a tag and quote it in their own tag. This type of tag referencing is very similar to commenting to someone elses message on social media. The type of quoting system allows for a direct pointer to the utxo of a previous tag, allowing for dynamic connections to made while all being referencable on-chain.
 
 Any wallet may make a tag but if a tagger happens to have a cogno then their data will be connected and the profile will be shown with their post. This allows public profiles to exist while permitting pseudo-anonymous taggers. 
 
+## Use Case
+
+Tagging the chain with messages can work as a social media dApp or as a data aggregation portal for oracles. The key aspect about the tagging system is the cogno connections. On chain data structures can be linked to off chain profiles that are held on chain.
+
+![Cogno connecting with a Tag](./images/cogno-tag-connection.png)
+
+There are many cogno and many tags but the connections between them reveal a wallet profile that can be shown off chain. The connection is displayed above by the yellow arrows indicating a network betwen a cogno, a tag, and a quote. This information may be used to relay the cogno information for a frontend website to use.
+
+# Other Data
+
+Any new data structure may be added to the ecosystem along side the cogno and tag structures.

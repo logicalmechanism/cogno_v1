@@ -12,7 +12,7 @@ script_address=$(${cli} address build --payment-script-file ${script_path} --tes
 issuer_address=$(cat wallets/seller-wallet/payment.addr)
 issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/seller-wallet/payment.vkey)
 
-issuer_address_out="${issuer_address} + 2000000"
+issuer_address_out="${issuer_address} + 10000000"
 echo "Issuer OUTPUT: "${issuer_address_out}
 #
 # exit

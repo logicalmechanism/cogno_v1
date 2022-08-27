@@ -14,7 +14,7 @@ issuer_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/sel
 
 reference_pkh=$(${cli} address key-hash --payment-verification-key-file wallets/reference-wallet/payment.vkey)
 
-lock_value=2000000
+lock_value=5000000
 
 sc_address_out="${script_address} + ${lock_value}"
 echo "Script OUTPUT: "${sc_address_out}
