@@ -88,7 +88,7 @@ For this example address, the datum will become
   ]
 }
 ```
-The datum above is the default cogno profile for a new user. The other information contained in the datum are for holding information to create a custom profile for the cogno.
+The datum above is the default cogno profile for a new user. The other entries in the datum are designated for information used to create a custom profile for the cogno.
 
 ## Use Case
 
