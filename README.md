@@ -96,7 +96,7 @@ When a wallet address is queried, the wallet address can be cross reference with
 
 # tag
 
-The tag data structure is designed for displaying and connecting messages on the blockchain. Similarly to the cogno data, a wallet owns the utxo that holds their message. The tag data holds a tag, a short title or label for the post, the details of the post, and if applicable a quote, atxid of a previous post. The user may decide to remove the tag after tagging or they may just update an already existing tag for new message. The message is permanent and available to all.
+The tag data structure is designed for displaying and connecting messages on the blockchain. Similarly to the cogno data, a wallet owns the utxo that holds their message. The tag data holds a tag, a short title or label for the post, the details of the post, and if applicable a quote, a txId of a previous post. The user may decide to remove the tag after tagging or they may just update an already existing tag with a new message. The message is permanent and available to all on the blockchain.
 
 Another user may see a tag and quote it in their own tag. This type of tag referencing is very similar to commenting to someone elses message on social media. The type of quoting system allows for a direct pointer to the utxo of a previous tag, allowing for dynamic connections to made while all being referencable on-chain.
 

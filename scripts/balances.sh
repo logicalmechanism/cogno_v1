@@ -16,14 +16,29 @@ collat_address=$(cat wallets/collat-wallet/payment.addr)
 ${cli} query protocol-parameters --testnet-magic ${testnet_magic} --out-file tmp/protocol.json
 ${cli} query tip --testnet-magic ${testnet_magic} | jq
 
-echo -e "\n\nScript Address:" ${script_address}
+echo
+echo -e "\033[1;35m Script Address:" 
+echo -e "\n${script_address}\n";
 ${cli} query utxo --address ${script_address} --testnet-magic ${testnet_magic}
+echo -e "\033[0m"
 
-echo -e "\n\nWallet Address:" ${wallet_address}
+#
+echo
+echo -e "\033[1;36m Wallet Address:" 
+echo -e "\n${wallet_address}\n";
 ${cli} query utxo --address ${wallet_address} --testnet-magic ${testnet_magic}
+echo -e "\033[0m"
 
-echo -e "\n\nReference Address:" ${reference_address}
+#
+echo
+echo -e "\033[1;34m Reference Address:" 
+echo -e "\n \033[1;34m ${reference_address}\n";
 ${cli} query utxo --address ${reference_address} --testnet-magic ${testnet_magic}
+echo -e "\033[0m"
 
-echo -e "\n\nCollat Address:" ${collat_address}
+#
+echo
+echo -e "\033[1;33m Collateral Address:" 
+echo -e "\n${collat_address}\n";
 ${cli} query utxo --address ${collat_address} --testnet-magic ${testnet_magic}
+echo -e "\033[0m"

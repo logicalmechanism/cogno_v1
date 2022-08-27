@@ -91,7 +91,7 @@ mkValidator datum redeemer context =
       let userPkh  = tPkh td
           userAddr = createAddress userPkh (tSc td)
       in case redeemer of
-        -- remove utxo from the contract
+        -- remove utxo from the contract and send to user's address
         Remove -> do
           { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
           ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
@@ -99,7 +99,7 @@ mkValidator datum redeemer context =
           ;         traceIfFalse "Tag Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
         
-        -- update the utxo datum
+        -- update the utxo datum and send the utxo back to the contract
         Update ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
@@ -122,15 +122,15 @@ mkValidator datum redeemer context =
       let userPkh  = cdPkh cd
           userAddr = createAddress userPkh (cdSc cd)
       in case redeemer of
-        -- remove utxo from the contract
+        -- remove utxo from the contract and send it back to the user's address
         Remove -> do
           { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
           ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
           ; let c = traceIfFalse "Value Not Paid"     $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
-          ;         traceIfFalse "Cogno Remove Error" $ all (==(True :: Bool)) [a,b,c]
+          ;         traceIfFalse "Cogno Remove Error" $ all (==True) [a,b,c]
           }
 
-        -- update the utxo datum
+        -- update the utxo datum and send it back to the contract
         Update ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
@@ -141,27 +141,28 @@ mkValidator datum redeemer context =
                   ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
                   ; let c = traceIfFalse "Incorrect Datum"    $ updateCognoData cd cd'                             -- the datum changes correctly
                   ; let d = traceIfFalse "Minimum Value"      $ Value.geq validatingValue minimumValue             -- Must have minimum value
-                  ;         traceIfFalse "Cogno Update Error" $ all (==(True :: Bool)) [a,b,c,d]
+                  ;         traceIfFalse "Cogno Update Error" $ all (==True) [a,b,c,d]
                   }
                 
                 -- only cogno datum
                 _ -> False
 
-        -- anyone can give a kudos
+        -- anyone can give a kudos by spending a profile back to the contract with a +1 kudos.
         Kudos ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
             Just outboundDatum ->
               case outboundDatum of
                 ( Cogno cd' ) -> do
-                  { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
-                  ; let b = traceIfFalse "Incorrect Datum"  $ giveAKudo cd cd'                                   -- the datum changes correctly
-                  ; let c = traceIfFalse "Minimum Value"    $ Value.geq validatingValue minimumValue             -- Must have minimum value
-                  ;         traceIfFalse "Cog Update Error" $ all (==(True :: Bool)) [a,b,c]
+                  { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Incorrect Datum"    $ giveAKudo cd cd'                                   -- the datum changes correctly
+                  ; let c = traceIfFalse "Minimum Value"      $ Value.geq validatingValue minimumValue             -- Must have minimum value
+                  ;         traceIfFalse "Cogno Update Error" $ all (==True) [a,b,c]
                   }
                 
                 -- only cogno datum
                 _ -> False
+  -- end of case datum
   where
     info :: PlutusV2.TxInfo
     info = ContextsV2.scriptContextTxInfo  context
@@ -185,7 +186,7 @@ mkValidator datum redeemer context =
     
     -- threshold ada amount to do things, 10 ada
     minimumValue :: PlutusV2.Value
-    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace
+    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace -- define near top of file
     
     -- | Get the inline datum that holds a value from a list of tx outs.
     getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType
