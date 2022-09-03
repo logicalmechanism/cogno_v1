@@ -128,6 +128,35 @@ Tagging the chain with messages can work as a social media dApp or as a data agg
 
 There are many cogno and many tags but the connections between them reveal a wallet profile that can be shown off chain. The connection is displayed above by the yellow arrows indicating a network betwen a cogno, a tag, and a quote. This information may be used to relay the cogno information for a frontend website to use.
 
-# Other Data
+# rank
 
-Any new data structure may be added to the ecosystem along side the cogno and tag structures.
+The rank datas structure provides the means for a cogno to acquire upvotes and downvotes but applied to a specific rank use case, a rank type. A cogno may have many rank structures attach to it, providing rank information for different ecosystems. Each rank is connected to a cogno via the tx hash and index. This means when a cogno is updated the connected rank datums need to be updated too. 
+
+```hs
+data RankData = RankData
+  { rPkh        :: PlutusV2.PubKeyHash
+  -- ^ The public key hash of the wallet.
+  , rSc         :: PlutusV2.PubKeyHash
+  -- ^ The stake hash of the wallet.
+  , rUpVote     :: Integer
+  -- ^ The up rank of the wallet.
+  , rDownVote   :: Integer
+  -- ^ The down rank of the wallet.
+  , rAge        :: Integer
+  -- ^ The age of the wallet rank.
+  , rCognoTxId  :: PlutusV2.BuiltinByteString
+  -- ^ The TxId of the cogno connected to this rank.
+  , rCognoIndex :: Integer
+  -- ^ The Index of the TxId of the congo connected to this rank.
+  , rType       :: Integer
+  -- ^ The type of rank the data is representing.
+  }
+```
+
+The user can always remove a rank from the contract just like a cogno or tag. The only user updatable parameter is the cogno transaction information. The goal is keeping a rank for a long time so trust may be built up. This is why there is an age parameter that should remain constant from the initial value. The up an down voting of a rank is open to all. This will be improved in the future but the basic implementation exists. The rank type is a designation flag for which ecosystem this rank applies too. Many groups may need some form of user ranking so creating a global rank system here just doesn't make sense. This allows for more granular control over one's own cogno.
+
+## Use Case
+
+A user may have a cogno that represents a profile in some Cardano ecosystem. Within this ecosystem, their exists a ranking system that determines what a user can and can not do inside the ecosystem. This ranking system can be represented by a rank data attached to a cogno. A positive action may result in an upvote while a negative action may result in a downvote. This may seem fairly restrictive but if an ecosystem requires permission based smart contract interactions then this type of datum interaction is imperative.
+
+Another use may be attach rank to an arbitrary UTxO, like a tag, in which user may cast an up or down vote. The datum is designed to hold the tx information of just a cogno but the data is formatted for any tx information so as long as the off-chain handles the referencing correctly it may be used to represent whatever the user wants. In the tag example, it would act like up and down votes on a social media post. The tx that is being referenced can also be from another smart contract, allowing the rank to represent the outcome of a public vote. The possiblities are almost endless.

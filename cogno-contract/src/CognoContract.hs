@@ -115,9 +115,9 @@ mkValidator datum redeemer context =
             Just outboundDatum ->
               case outboundDatum of
                 ( Rank rd' ) -> do
-                  { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
-                  ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
-                  ; let c = traceIfFalse "Incorrect Datum"  $ checkForNewCogno rd rd'                            -- the datum changes correctly
+                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"   $ checkForNewCogno rd rd'                            -- the datum changes correctly
                   ;         traceIfFalse "Rank Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
 
