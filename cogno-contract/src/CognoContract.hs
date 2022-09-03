@@ -42,6 +42,7 @@ import qualified Plutus.V2.Ledger.Contexts      as ContextsV2
 import           Plutus.Script.Utils.V2.Scripts as Utils
 import           CognoDataType
 import           TagDataType
+import           RankDataType
 import           HelperFunctions
 {- |
   Author   : The Ancient Kraken
@@ -64,20 +65,24 @@ thresholdLovelace = 10000000
 -- | Create the datum type.
 -------------------------------------------------------------------------------
 data CustomDatumType = Cogno CognoData |
-                       Tag TagData
+                       Tag TagData     |
+                       Rank RankData
 PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno, 0 )
                                              , ( 'Tag,   1 )
+                                             , ( 'Rank,  2 )
                                              ]
 
 -------------------------------------------------------------------------------
 -- | Create the redeemer type.
 -------------------------------------------------------------------------------
-data CustomRedeemerType = Remove | 
-                          Update |
-                          Kudos
-PlutusTx.makeIsDataIndexed ''CustomRedeemerType [ ( 'Remove, 0 )
-                                                , ( 'Update, 1 )
-                                                , ( 'Kudos,  2 )
+data CustomRedeemerType = Remove  | 
+                          Update  |
+                          Kudos   |
+                          Dislike 
+PlutusTx.makeIsDataIndexed ''CustomRedeemerType [ ( 'Remove,  0 )
+                                                , ( 'Update,  1 )
+                                                , ( 'Kudos,   2 )
+                                                , ( 'Dislike, 3 )
                                                 ]
 -------------------------------------------------------------------------------
 -- | mkValidator :: Datum -> Redeemer -> ScriptContext -> Bool
@@ -86,7 +91,76 @@ PlutusTx.makeIsDataIndexed ''CustomRedeemerType [ ( 'Remove, 0 )
 mkValidator :: CustomDatumType -> CustomRedeemerType -> PlutusV2.ScriptContext -> Bool
 mkValidator datum redeemer context =
   case datum of
-    -- the tag state
+    {- | The rank state
+
+      Any and all rank validation logic will be here.
+
+    -}
+    ( Rank rd ) -> 
+      let userPkh  = rPkh rd
+          userAddr = createAddress userPkh (rSc rd)
+      in case redeemer of
+        -- remove utxo from the contract and send to user's address
+        Remove -> do
+          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"    $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          ;         traceIfFalse "Rank Remove Error" $ all (==(True :: Bool)) [a,b,c]
+          }
+        
+        -- update the utxo datum and send the utxo back to the contract
+        Update ->
+          case getOutboundDatum contTxOutputs validatingValue of
+            Nothing            -> False
+            Just outboundDatum ->
+              case outboundDatum of
+                ( Rank rd' ) -> do
+                  { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"  $ checkForNewCogno rd rd'                            -- the datum changes correctly
+                  ;         traceIfFalse "Rank Update Error" $ all (==(True :: Bool)) [a,b,c]
+                  }
+
+                -- only rank datum
+                _ -> False
+        
+        -- anyone can give a kudos by spending a profile back to the contract with a + 1 kudos.
+        Kudos ->
+          case getOutboundDatum contTxOutputs validatingValue of
+            Nothing            -> False
+            Just outboundDatum ->
+              case outboundDatum of
+                ( Rank rd' ) -> do
+                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Incorrect Datum"   $ checkForUpVote rd rd'                              -- the datum changes correctly
+                  ; let c = traceIfFalse "Minimum Value"     $ Value.geq validatingValue minimumValue             -- Must have minimum value
+                  ;         traceIfFalse "Rank Upvote Error" $ all (==True) [a,b,c]
+                  }
+                
+                -- only rank datum
+                _ -> False
+        
+        -- anyone can give a kudos by spending a profile back to the contract with a + 1 kudos.
+        Dislike ->
+          case getOutboundDatum contTxOutputs validatingValue of
+            Nothing            -> False
+            Just outboundDatum ->
+              case outboundDatum of
+                ( Rank rd' ) -> do
+                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Incorrect Datum"   $ checkForDownVote rd rd'                            -- the datum changes correctly
+                  ; let c = traceIfFalse "Minimum Value"     $ Value.geq validatingValue minimumValue             -- Must have minimum value
+                  ;         traceIfFalse "Rank Dnvote Error" $ all (==True) [a,b,c]
+                  }
+                
+                -- only rank datum
+                _ -> False
+
+    {- | The tag state
+
+      Any and all tag validation logic will be here.
+      
+    -}
     ( Tag td ) ->
       let userPkh  = tPkh td
           userAddr = createAddress userPkh (tSc td)
@@ -114,10 +188,15 @@ mkValidator datum redeemer context =
 
                 -- only tag datum
                 _ -> False
+
         -- only remove or update redeemers
         _ -> False
 
-    -- the cogno state
+    {- | The cogno state
+
+      Any and all cogno validation logic will be here.
+      
+    -}
     ( Cogno cd ) ->
       let userPkh  = cdPkh cd
           userAddr = createAddress userPkh (cdSc cd)
@@ -162,6 +241,9 @@ mkValidator datum redeemer context =
                 
                 -- only cogno datum
                 _ -> False
+        
+        -- only remove, update, or kudos redeemers
+        _ -> False
   -- end of case datum
   where
     info :: PlutusV2.TxInfo
