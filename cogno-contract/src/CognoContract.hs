@@ -65,8 +65,8 @@ thresholdLovelace = 10000000
 -- | Create the datum type.
 -------------------------------------------------------------------------------
 data CustomDatumType = Cogno CognoData |
-                       Tag TagData     |
-                       Rank RankData
+                       Tag   TagData   |
+                       Rank  RankData
 PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno, 0 )
                                              , ( 'Tag,   1 )
                                              , ( 'Rank,  2 )
@@ -124,7 +124,7 @@ mkValidator datum redeemer context =
                 -- only rank datum
                 _ -> False
         
-        -- anyone can give a kudos by spending a profile back to the contract with a + 1 kudos.
+        -- anyone can give a kudos (upvote) by spending a profile back to the contract with a + 1 upvote.
         Kudos ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
@@ -140,7 +140,7 @@ mkValidator datum redeemer context =
                 -- only rank datum
                 _ -> False
         
-        -- anyone can give a kudos by spending a profile back to the contract with a + 1 kudos.
+        -- anyone can give a dislike (downvote) by spending a profile back to the contract with a + 1 downvote.
         Dislike ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False

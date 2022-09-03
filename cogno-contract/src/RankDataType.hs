@@ -34,6 +34,7 @@ module RankDataType
   , rAge
   , rCognoTxId
   , rCognoIndex
+  , rType
   , checkForUpVote
   , checkForDownVote
   , checkForNewCogno
@@ -49,20 +50,22 @@ import qualified Plutus.V2.Ledger.Api as PlutusV2
 -- | Create the RankData object.
 -------------------------------------------------------------------------------
 data RankData = RankData
-  { rPkh      :: PlutusV2.PubKeyHash
+  { rPkh        :: PlutusV2.PubKeyHash
   -- ^ The public key hash of the wallet.
-  , rSc       :: PlutusV2.PubKeyHash
+  , rSc         :: PlutusV2.PubKeyHash
   -- ^ The stake hash of the wallet.
-  , rUpVote   :: Integer
+  , rUpVote     :: Integer
   -- ^ The up rank of the wallet.
-  , rDownVote :: Integer
+  , rDownVote   :: Integer
   -- ^ The down rank of the wallet.
-  , rAge      :: Integer
+  , rAge        :: Integer
   -- ^ The age of the wallet rank.
-  , rCognoTxId :: PlutusV2.BuiltinByteString
+  , rCognoTxId  :: PlutusV2.BuiltinByteString
   -- ^ The TxId of the cogno connected to this rank.
   , rCognoIndex :: Integer
   -- ^ The Index of the TxId of the congo connected to this rank.
+  , rType       :: Integer
+  -- ^ The type of rank the data is representing.
   }
 PlutusTx.unstableMakeIsData ''RankData
 
@@ -74,7 +77,8 @@ checkForUpVote a b = ( rPkh        a == rPkh        b ) &&
                      ( rDownVote   a == rDownVote   b ) &&
                      ( rAge        a == rAge        b ) &&
                      ( rCognoTxId  a == rCognoTxId  b ) &&
-                     ( rCognoIndex a == rCognoIndex b )
+                     ( rCognoIndex a == rCognoIndex b ) &&
+                     ( rType       a == rType       b )
 
 -- a is old; b is new
 checkForDownVote :: RankData -> RankData -> Bool
@@ -84,7 +88,8 @@ checkForDownVote a b =  ( rPkh          a == rPkh        b ) &&
                         ( rDownVote a + 1 == rDownVote   b ) &&
                         ( rAge          a == rAge        b ) &&
                         ( rCognoTxId    a == rCognoTxId  b ) &&
-                        ( rCognoIndex   a == rCognoIndex b )
+                        ( rCognoIndex   a == rCognoIndex b ) &&
+                        ( rType         a == rType       b )
 
 -- a is old; b is new
 checkForNewCogno :: RankData -> RankData -> Bool
@@ -93,5 +98,6 @@ checkForNewCogno a b =  ( rPkh       a == rPkh        b ) &&
                         ( rUpVote    a == rUpVote     b ) &&
                         ( rDownVote  a == rDownVote   b ) &&
                         ( rAge       a == rAge        b ) &&
-                        ( rCognoTxId a /= rCognoTxId  b )
+                        ( rCognoTxId a /= rCognoTxId  b ) &&
+                        ( rType      a == rType       b )
 

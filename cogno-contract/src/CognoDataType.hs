@@ -61,7 +61,7 @@ data CognoData = CognoData
   , cdDetail :: [PlutusV2.BuiltinByteString]
   -- ^ The details of the wallet.
   , cdLocale  :: PlutusV2.BuiltinByteString
-  -- ^ The wallets locale.
+  -- ^ The wallet's locale.
   }
 PlutusTx.unstableMakeIsData ''CognoData
 
