@@ -48,6 +48,8 @@ import           HelperFunctions
   Author   : The Ancient Kraken
   Copyright: 2022
   
+  A smart contract for UTxO-based cognomens. 
+  
   cardano-cli 1.35.3 - linux-x86_64 - ghc-8.10
   git rev 950c4e222086fed5ca53564e642434ce9307b0b9
 
@@ -56,11 +58,6 @@ import           HelperFunctions
 
   The Glorious Glasgow Haskell Compilation System, version 8.10.7
 -}
--------------------------------------------------------------------------------
--- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
--------------------------------------------------------------------------------
-thresholdLovelace :: Integer
-thresholdLovelace = 10000000
 -------------------------------------------------------------------------------
 -- | Create the datum type.
 -------------------------------------------------------------------------------
@@ -246,6 +243,7 @@ mkValidator datum redeemer context =
         _ -> False
   -- end of case datum
   where
+
     info :: PlutusV2.TxInfo
     info = ContextsV2.scriptContextTxInfo  context
 
@@ -266,9 +264,12 @@ mkValidator datum redeemer context =
         Nothing    -> traceError "" -- This error should never be hit.
         Just input -> PlutusV2.txOutValue $ PlutusV2.txInInfoResolved input
     
-    -- | threshold ada amount to do things, 10 ada
+    -- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
+    thresholdLovelace :: Integer
+    thresholdLovelace = 10000000
+
     minimumValue :: PlutusV2.Value
-    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace -- defined near top of file
+    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace
     
     -- | Get the inline datum that holds a value from a list of tx outs.
     getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType

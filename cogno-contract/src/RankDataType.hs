@@ -42,24 +42,20 @@ module RankDataType
 import qualified PlutusTx
 import           PlutusTx.Prelude
 import qualified Plutus.V2.Ledger.Api as PlutusV2
-{- |
-  Author   : The Ancient Kraken
-  Copyright: 2022
--}
 -------------------------------------------------------------------------------
 -- | Create the RankData object.
 -------------------------------------------------------------------------------
 data RankData = RankData
   { rPkh        :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the wallet.
+  -- ^ The public key hash of the rank.
   , rSc         :: PlutusV2.PubKeyHash
-  -- ^ The stake hash of the wallet.
+  -- ^ The stake hash of the rank.
   , rUpVote     :: Integer
-  -- ^ The up rank of the wallet.
+  -- ^ The upvote of the rank.
   , rDownVote   :: Integer
-  -- ^ The down rank of the wallet.
+  -- ^ The downvote of the rank.
   , rAge        :: Integer
-  -- ^ The age of the wallet rank.
+  -- ^ The age of the rank.
   , rCognoTxId  :: PlutusV2.BuiltinByteString
   -- ^ The TxId of the cogno connected to this rank.
   , rCognoIndex :: Integer
@@ -69,7 +65,7 @@ data RankData = RankData
   }
 PlutusTx.unstableMakeIsData ''RankData
 
--- a is old; b is new
+-- nothing may change but the upvote by 1.
 checkForUpVote :: RankData -> RankData -> Bool
 checkForUpVote a b = ( rPkh        a == rPkh        b ) &&
                      ( rSc         a == rSc         b ) &&
@@ -80,7 +76,7 @@ checkForUpVote a b = ( rPkh        a == rPkh        b ) &&
                      ( rCognoIndex a == rCognoIndex b ) &&
                      ( rType       a == rType       b )
 
--- a is old; b is new
+-- nothing can change but the downvote by 1.
 checkForDownVote :: RankData -> RankData -> Bool
 checkForDownVote a b =  ( rPkh          a == rPkh        b ) &&
                         ( rSc           a == rSc         b ) &&
@@ -91,7 +87,7 @@ checkForDownVote a b =  ( rPkh          a == rPkh        b ) &&
                         ( rCognoIndex   a == rCognoIndex b ) &&
                         ( rType         a == rType       b )
 
--- a is old; b is new
+-- the cogno tx id must change.
 checkForNewCogno :: RankData -> RankData -> Bool
 checkForNewCogno a b =  ( rPkh       a == rPkh        b ) &&
                         ( rSc        a == rSc         b ) &&

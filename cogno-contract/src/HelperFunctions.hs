@@ -34,10 +34,6 @@ module HelperFunctions
 import           PlutusTx.Prelude 
 import           Plutus.V1.Ledger.Credential
 import qualified Plutus.V2.Ledger.Api        as PlutusV2
-{- |
-  Author   : The Ancient Kraken
-  Copyright: 2022
--}
 -------------------------------------------------------------------------
 -- | Create a proper Address type.
 -------------------------------------------------------------------------
