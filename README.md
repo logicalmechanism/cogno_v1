@@ -57,13 +57,13 @@ The tag data structure is designed for displaying and connecting messages on the
 ```hs
 data TagData = TagData
   { tPkh    :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the wallet.
+  -- ^ The public key hash of the tagger.
   , tSc     :: PlutusV2.PubKeyHash
-  -- ^ The stake hash of the wallet.
+  -- ^ The stake hash of the tagger.
   , tTag    :: PlutusV2.BuiltinByteString
-  -- ^ The tag of the message.
+  -- ^ The actual tag.
   , tDetail :: [PlutusV2.BuiltinByteString]
-  -- ^ The details of the message.
+  -- ^ The details of the tag.
   , tQuoteTxId :: PlutusV2.BuiltinByteString
   -- ^ The TxId of the quote tag.
   , tQuoteIndex :: Integer
@@ -91,15 +91,15 @@ The rank datas structure provides the means for a Cogno to acquire upvotes and d
 ```hs
 data RankData = RankData
   { rPkh        :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the wallet.
+  -- ^ The public key hash of the rank.
   , rSc         :: PlutusV2.PubKeyHash
-  -- ^ The stake hash of the wallet.
+  -- ^ The stake hash of the rank.
   , rUpVote     :: Integer
-  -- ^ The up rank of the wallet.
+  -- ^ The upvote of the rank.
   , rDownVote   :: Integer
-  -- ^ The down rank of the wallet.
+  -- ^ The downvote of the rank.
   , rAge        :: Integer
-  -- ^ The age of the wallet rank.
+  -- ^ The age of the rank.
   , rCognoTxId  :: PlutusV2.BuiltinByteString
   -- ^ The TxId of the cogno connected to this rank.
   , rCognoIndex :: Integer
