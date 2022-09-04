@@ -40,38 +40,34 @@ module CognoDataType
 import qualified PlutusTx
 import           PlutusTx.Prelude
 import qualified Plutus.V2.Ledger.Api as PlutusV2
-{- |
-  Author   : The Ancient Kraken
-  Copyright: 2022
--}
 -------------------------------------------------------------------------------
 -- | Create the cogno data object.
 -------------------------------------------------------------------------------
 data CognoData = CognoData
   { cdPkh    :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the wallet.
+  -- ^ The public key hash of the cogno.
   , cdSc     :: PlutusV2.PubKeyHash
-  -- ^ The stake hash of the wallet.
+  -- ^ The stake hash of the cogno.
   , cdKudos  :: Integer
-  -- ^ The wallet's global kudos points.
+  -- ^ The cogno's global kudos points.
   , cdCogno  :: PlutusV2.BuiltinByteString
-  -- ^ The cognomen of the wallet.
+  -- ^ The actual cognomen.
   , cdImage  :: [PlutusV2.BuiltinByteString]
-  -- ^ The image of the wallet.
+  -- ^ The image of the cogno.
   , cdDetail :: [PlutusV2.BuiltinByteString]
-  -- ^ The details of the wallet.
+  -- ^ The details of the cogno.
   , cdLocale  :: PlutusV2.BuiltinByteString
-  -- ^ The wallets locale.
+  -- ^ The cogno's locale.
   }
 PlutusTx.unstableMakeIsData ''CognoData
 
--- Owner must not change and the kudos is constant
+-- Owner must not change and the kudos remains constant
 updateCognoData :: CognoData -> CognoData -> Bool
 updateCognoData a b = ( cdPkh   a == cdPkh   b ) &&
                       ( cdSc    a == cdSc    b ) &&
                       ( cdKudos a == cdKudos b )
 
--- nothing can change but the kudos by one
+-- nothing can change but the kudos increases by one
 giveAKudo :: CognoData -> CognoData -> Bool
 giveAKudo a b = ( cdPkh       a == cdPkh    b ) &&
                 ( cdSc        a == cdSc     b ) &&

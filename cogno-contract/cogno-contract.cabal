@@ -48,6 +48,7 @@ library
   exposed-modules:      CognoContract
                         CognoDataType
                         TagDataType
+                        RankDataType
                         HelperFunctions
 
   build-depends:        bytestring

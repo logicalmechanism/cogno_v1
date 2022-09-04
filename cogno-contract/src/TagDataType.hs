@@ -38,22 +38,18 @@ module TagDataType
 import qualified PlutusTx
 import           PlutusTx.Prelude
 import qualified Plutus.V2.Ledger.Api as PlutusV2
-{- |
-  Author   : The Ancient Kraken
-  Copyright: 2022
--}
 -------------------------------------------------------------------------------
 -- | Create the tag data object.
 -------------------------------------------------------------------------------
 data TagData = TagData
   { tPkh    :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the wallet.
+  -- ^ The public key hash of the tagger.
   , tSc     :: PlutusV2.PubKeyHash
-  -- ^ The stake hash of the wallet.
+  -- ^ The stake hash of the tagger.
   , tTag    :: PlutusV2.BuiltinByteString
-  -- ^ The tag of the message.
+  -- ^ The actual tag.
   , tDetail :: [PlutusV2.BuiltinByteString]
-  -- ^ The details of the message.
+  -- ^ The details of the tag.
   , tQuoteTxId :: PlutusV2.BuiltinByteString
   -- ^ The TxId of the quote tag.
   , tQuoteIndex :: Integer
