@@ -124,7 +124,7 @@ mkValidator datum redeemer context =
                 -- only rank datum
                 _ -> False
         
-        -- anyone can give a kudos (upvote) by spending a profile back to the contract with a + 1 upvote.
+        -- anyone can give a kudos (upvote) by spending a profile back to the contract with a +1 upvote.
         Kudos ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
@@ -140,7 +140,7 @@ mkValidator datum redeemer context =
                 -- only rank datum
                 _ -> False
         
-        -- anyone can give a dislike (downvote) by spending a profile back to the contract with a + 1 downvote.
+        -- anyone can give a dislike (downvote) by spending a profile back to the contract with a +1 downvote.
         Dislike ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
@@ -226,7 +226,7 @@ mkValidator datum redeemer context =
                 -- only cogno datum
                 _ -> False
 
-        -- anyone can give a kudos by spending a profile back to the contract with a + 1 kudos.
+        -- anyone can give a kudos by spending a profile back to the contract with a +1 kudos.
         Kudos ->
           case getOutboundDatum contTxOutputs validatingValue of
             Nothing            -> False
