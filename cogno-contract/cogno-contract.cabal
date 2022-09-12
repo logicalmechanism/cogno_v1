@@ -49,6 +49,7 @@ library
                         CognoDataType
                         TagDataType
                         RankDataType
+                        OracleDataType
                         HelperFunctions
 
   build-depends:        bytestring
