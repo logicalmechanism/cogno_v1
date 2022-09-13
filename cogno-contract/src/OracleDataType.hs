@@ -41,6 +41,7 @@ module OracleDataType
   , testData
   , getInPriceConversion
   , getOutPriceConversion
+  , updateOracleData
   ) where
 import qualified PlutusTx
 import           PlutusTx.Prelude
@@ -80,20 +81,33 @@ testData :: OracleData
 testData = OracleData
   { oPkh        = ""
   , oSc         = ""
-  , oInPid      = ""
-  , oInTkn      = ""
-  , oInAmt      = 741636485
+  , oInPid      = "af2e27f580f7f08e93190a81f72462f153026d06450924726645891b"
+  , oInTkn      = "44524950"
+  , oInAmt      = 741636485 -- drip
   , oOutPid     = ""
   , oOutTkn     = ""
-  , oOutAmt     = 1000000
+  , oOutAmt     = 1000000 -- ada
   , oAge        = 0
   , oCognoTxId  = ""
   , oCognoIndex = 0
   }
 
-getInPriceConversion :: Integer -> OracleData -> Integer
-getInPriceConversion amt datum = (divide amt (oInAmt datum)) * (oOutAmt datum)
 
+-- only the in / out amts and cogno data may change. The age must greater or equal to its current value.
+updateOracleData :: OracleData -> OracleData -> Bool
+updateOracleData a b =  ( oPkh    a == oPkh    b ) &&
+                        ( oSc     a == oSc     b ) &&
+                        ( oInPid  a == oInPid  b ) &&
+                        ( oInTkn  a == oInTkn  b ) &&
+                        ( oOutPid a == oOutPid b ) &&
+                        ( oOutTkn a == oOutTkn b ) &&
+                        ( oAge    a >= oAge    b )
+
+-- I have drip and want ada for it
+getInPriceConversion :: Integer -> OracleData -> Integer
+getInPriceConversion amt datum = divide (amt * (oOutAmt datum)) (oInAmt datum)
+
+-- I have ada and want drip for it
 getOutPriceConversion :: Integer -> OracleData -> Integer
-getOutPriceConversion amt datum = (divide amt (oOutAmt datum)) * (oInAmt datum)
+getOutPriceConversion amt datum = divide (amt * (oInAmt datum)) (oOutAmt datum)
 
