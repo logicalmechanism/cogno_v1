@@ -43,10 +43,13 @@ import           Plutus.Script.Utils.V2.Scripts as Utils
 import           CognoDataType
 import           TagDataType
 import           RankDataType
+import           OracleDataType
 import           HelperFunctions
 {- |
   Author   : The Ancient Kraken
   Copyright: 2022
+  
+  A smart contract for UTxO-based cognomens. 
   
   cardano-cli 1.35.3 - linux-x86_64 - ghc-8.10
   git rev 950c4e222086fed5ca53564e642434ce9307b0b9
@@ -57,19 +60,16 @@ import           HelperFunctions
   The Glorious Glasgow Haskell Compilation System, version 8.10.7
 -}
 -------------------------------------------------------------------------------
--- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
--------------------------------------------------------------------------------
-thresholdLovelace :: Integer
-thresholdLovelace = 10000000
--------------------------------------------------------------------------------
 -- | Create the datum type.
 -------------------------------------------------------------------------------
-data CustomDatumType = Cogno CognoData |
-                       Tag   TagData   |
-                       Rank  RankData
-PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno, 0 )
-                                             , ( 'Tag,   1 )
-                                             , ( 'Rank,  2 )
+data CustomDatumType = Cogno  CognoData  |
+                       Tag    TagData    |
+                       Rank   RankData   |
+                       Oracle OracleData 
+PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno,  0 )
+                                             , ( 'Tag,    1 )
+                                             , ( 'Rank,   2 )
+                                             , ( 'Oracle, 3 )
                                              ]
 
 -------------------------------------------------------------------------------
@@ -91,6 +91,42 @@ PlutusTx.makeIsDataIndexed ''CustomRedeemerType [ ( 'Remove,  0 )
 mkValidator :: CustomDatumType -> CustomRedeemerType -> PlutusV2.ScriptContext -> Bool
 mkValidator datum redeemer context =
   case datum of
+    {- | The oracle state
+
+      Any and all oracle validation logic will be here.
+
+    -}
+    (Oracle od) ->
+      let userPkh  = oPkh od
+          userAddr = createAddress userPkh (oSc od)
+      in case redeemer of
+        -- remove utxo from the contract and send to user's address
+        Remove -> do
+          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"    $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          ;         traceIfFalse "Rank Remove Error" $ all (==(True :: Bool)) [a,b,c]
+          }
+        
+        -- update the utxo datum and send the utxo back to the contract
+        Update ->
+          case getOutboundDatum contTxOutputs validatingValue of
+            Nothing            -> False
+            Just outboundDatum ->
+              case outboundDatum of
+                ( Oracle od' ) -> do
+                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"   $ updateOracleData od od'                            -- the datum changes correctly
+                  ;         traceIfFalse "Rank Update Error" $ all (==(True :: Bool)) [a,b,c]
+                  }
+
+                -- only oracle datum
+                _ -> False
+        
+        -- only remove or update redeemers
+        _ -> False
+
     {- | The rank state
 
       Any and all rank validation logic will be here.
@@ -246,6 +282,7 @@ mkValidator datum redeemer context =
         _ -> False
   -- end of case datum
   where
+
     info :: PlutusV2.TxInfo
     info = ContextsV2.scriptContextTxInfo  context
 
@@ -266,9 +303,12 @@ mkValidator datum redeemer context =
         Nothing    -> traceError "" -- This error should never be hit.
         Just input -> PlutusV2.txOutValue $ PlutusV2.txInInfoResolved input
     
-    -- | threshold ada amount to do things, 10 ada
+    -- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
+    thresholdLovelace :: Integer
+    thresholdLovelace = 10000000
+
     minimumValue :: PlutusV2.Value
-    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace -- defined near top of file
+    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace
     
     -- | Get the inline datum that holds a value from a list of tx outs.
     getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType
