@@ -1,3 +1,19 @@
+# A smart contract for UTxO-based cognomens and data aggregation on the Cardano blockchain.
+
+There are many types of data structures inside the cogno ecosystem. Each with their own scope and use cases. Please use the table of contents below for further information.
+
+## Table of Contents
+
+[Cogno](#cogno)
+
+[Tag](#tag)
+
+[Rank](#rank)
+
+[Oracle](#oracle)
+
+
+
 # Cogno
 
 ```
@@ -13,6 +29,7 @@ used instead of the actual name of the person or thing
 ```
 
 A smart contract for UTxO-based cognomens. Each UTxO is a wallet identifier similar to ada handles but instead of NFTs representing the nickname it will be the datum attached to a UTxO inside a smart contract.
+
 
 ## Use
 
@@ -50,6 +67,8 @@ This is all the information required to identify a wallet address with a cognome
 
 When a wallet address is queried, the wallet address can be cross reference with datum data from this contract to relay information about that specific wallet. This behaves very similarly to already existing NFT based identification but the key difference is the updatable data and that it can be referenced on-chain. Smart contracts will now have the ability to reference a wallets Cogno and use that data in on-chain validation functions.
 
+[Back To Top](#table-of-contents)
+
 # Tag
 
 The tag data structure is designed for displaying and connecting messages on the blockchain. Similarly to the cogno data, a wallet owns the utxo that holds their message. The tag data holds a tag, a short title or label for the post, the details of the post, and if applicable a quote, the txId information of a previous post. 
@@ -83,6 +102,8 @@ Tagging the chain with messages can work as a social media dApp or as a data agg
 ![Cogno connecting with a Tag](./images/cogno-tag-connection.png)
 
 There are many cogno and many tags but the connections between them reveal a wallet profile that can be shown off-chain. The connection displayed above by the yellow arrows indicate a network betwen a cogno, a tag, and a quoted tag. This information may be used to relay the cogno information for a frontend website to use.
+
+[Back To Top](#table-of-contents)
 
 # Rank
 
@@ -120,9 +141,48 @@ A user may have a cogno that represents a profile in some Cardano ecosystem. Wit
 
 Another use may be attach rank to an arbitrary UTxO, like a tag, in which user may cast an up or down vote. The datum is designed to hold the tx information of just a Cogno but the data is formatted for any tx information so as long as the off-chain handles the referencing correctly it may be used to represent whatever the user wants. In the tag example, it would act like up and down votes on a social media post. The tx that is being referenced can also be from another smart contract, allowing the rank to represent the outcome of a public vote. The possiblities are almost endless.
 
-# Oracle (Price Feed)
+[Back To Top](#table-of-contents)
 
-A data structure designed to hold price conversion between cardano native assets.
+# Oracle
+
+A data structure designed to hold price conversion ratios between cardano native assets. Each UTxO will represent a data stream of prices between two tokens. The source of the data stream may be found with the cogno connection. For example ,some dex may provide the data feed for the oracle data. Their cogno would be their dex profile, displaying information about the oracle data.
+
+The data itself may either remain on the UTxO for future use, like time-averaging based-off the age parameter, or exchange specific data, or the entire utxo may be updated into the new data state. This is source dependent and left up for the data feed or oracle provider.
+
+```hs
+data OracleData = OracleData
+  { oPkh        :: PlutusV2.PubKeyHash
+  -- ^ The public key hash of the oracle.
+  , oSc         :: PlutusV2.PubKeyHash
+  -- ^ The stake hash of the oracle.
+  , oInPid      :: PlutusV2.CurrencySymbol
+  -- ^ The incoming pid
+  , oInTkn      :: PlutusV2.TokenName
+  -- ^ The incoming token name
+  , oInAmt      :: Integer
+  -- ^ The incoming token amount
+  , oOutPid     :: PlutusV2.CurrencySymbol
+  -- ^ The outgoing pid
+  , oOutTkn     :: PlutusV2.TokenName
+  -- ^ The outgoing token name
+  , oOutAmt     :: Integer
+  -- ^ The outgoing amount
+  , oAge        :: Integer
+  -- ^ The age of the data.
+  , oCognoTxId  :: PlutusV2.BuiltinByteString
+  -- ^ The TxId of the cogno connected to this oracle.
+  , oCognoIndex :: Integer
+  -- ^ The Index of the TxId of the congo connected to this oracle.
+  }
+```
+
+## Use Case
+
+The key use case for the oracle data is providing an on-chain data feed of price data from decentralized exchanges that are trading pairs of cardano native assets. A real example is Sundaeswap price api, providing a data feed for the oracle data used in token to token swaps.
+
+![Cogno connecting with an Oracle](./images/cogno-oracle-connection.png)
+
+[Back To Top](#table-of-contents)
 
 # Address to PubKeyHash Example
 
