@@ -1,21 +1,5 @@
 # A smart contract for UTxO-based cognomens and data aggregation on the Cardano blockchain.
 
-There are many types of data structures inside the cogno ecosystem. Each with their own scope and use cases. Please use the table of contents below for further information.
-
-## Table of Contents
-
-[Cogno](#cogno)
-
-[Tag](#tag)
-
-[Rank](#rank)
-
-[Oracle](#oracle)
-
-
-
-# Cogno
-
 ```
 cognomen 
 
@@ -28,19 +12,25 @@ A familiar, invented given name for a person or thing
 used instead of the actual name of the person or thing
 ```
 
-A smart contract for UTxO-based cognomens. Each UTxO is a wallet identifier similar to ada handles but instead of NFTs representing the nickname it will be the datum attached to a UTxO inside a smart contract.
+A smart contract for UTxO-based cognomens. Each UTxO is a wallet identifier similar to ADA handles but instead of NFTs representing the nickname it will be the datum attached to a UTxO inside a smart contract. There are many types of data structures inside the cogno ecosystem. Each with their own scope and use case. The primary use case of this contract is for reference. This contract will contain public wallet information for some ecosystems within Cardano. The table of contents below contains links for further information.
 
+## Table of Contents
 
-## Use
+[Cogno](#cogno)
 
-A user is always in control of their cognomen. A user may update or remove their cogno at anytime as long as their public key hash is present inside the transaction. Other users may give kudos to a cogno at any time to show praise for some account. The cogno is designed to hold many familiar social media profile-related data such as contact information or an image for the cogno. There is a minimum ada threshold to use some of the endpoints. This is to ensure there is always enough ada on the UTxO for whatever cogno data may be present and that each cogno has skin in the game via a refundable ada deposit. The minimum value is currently set to 10 ADA for testing.
+[Tag](#tag)
 
-The primary use case of this contract is for reference. This contract will contain wallet information for some ecosystem within Cardano.
+[Rank](#rank)
+
+[Oracle](#oracle)
+
+# Cogno
+
+A user is always in control of their cognomen. A user may update or remove their cogno at anytime as long as their public key hash is present inside the transaction. Other users may give kudos to a cogno at any time to show praise for some account. The cogno is designed to hold many familiar social media profile-related data such as contact information or an image for the cogno. There is a minimum ada threshold to use some of the endpoints. This is to ensure there is always enough ADA on the UTxO for whatever cogno data may be present inside a transaction. It can also act like a cogno's skin in the game via a refundable ada deposit. The minimum value is currently set to 10 ADA for testing.
 
 ## The basic Cogno
 
 A wallet will create a Cogno by supplying a payment public key hash, a staking credential, and a cognomen. A user may choose to update their Cogno to include a cogno image, some more details about their Cogno, and their locale.
-
 
 ```hs
 data CognoData = CognoData
