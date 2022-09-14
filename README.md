@@ -147,17 +147,17 @@ data OracleData = OracleData
   , oSc         :: PlutusV2.PubKeyHash
   -- ^ The stake hash of the oracle.
   , oInPid      :: PlutusV2.CurrencySymbol
-  -- ^ The incoming pid
+  -- ^ The incoming token pid.
   , oInTkn      :: PlutusV2.TokenName
-  -- ^ The incoming token name
+  -- ^ The incoming token name.
   , oInAmt      :: Integer
-  -- ^ The incoming token amount
+  -- ^ The incoming token amount.
   , oOutPid     :: PlutusV2.CurrencySymbol
-  -- ^ The outgoing pid
+  -- ^ The outgoing ptoken pid.
   , oOutTkn     :: PlutusV2.TokenName
-  -- ^ The outgoing token name
+  -- ^ The outgoing token name.
   , oOutAmt     :: Integer
-  -- ^ The outgoing amount
+  -- ^ The outgoing amount.
   , oAge        :: Integer
   -- ^ The age of the data.
   , oCognoTxId  :: PlutusV2.BuiltinByteString
@@ -175,7 +175,7 @@ The key use case for the oracle data is providing an on-chain data feed of price
 
 [Back To Top](#table-of-contents)
 
-# Address to PubKeyHash Example
+### Address to PubKeyHash Example
 
 Obtaining the PubKeyHash format for the datum from a base address is rather easy. Assume the wallet address is
 
