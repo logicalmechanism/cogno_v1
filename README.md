@@ -1,21 +1,5 @@
 # A smart contract for UTxO-based cognomens and data aggregation on the Cardano blockchain.
 
-There are many types of data structures inside the cogno ecosystem. Each with their own scope and use cases. Please use the table of contents below for further information.
-
-## Table of Contents
-
-[Cogno](#cogno)
-
-[Tag](#tag)
-
-[Rank](#rank)
-
-[Oracle](#oracle)
-
-
-
-# Cogno
-
 ```
 cognomen 
 
@@ -28,24 +12,32 @@ A familiar, invented given name for a person or thing
 used instead of the actual name of the person or thing
 ```
 
-A smart contract for UTxO-based cognomens. Each UTxO is a wallet identifier similar to ada handles but instead of NFTs representing the nickname it will be the datum attached to a UTxO inside a smart contract.
+A smart contract for UTxO-based cognomens. Each UTxO is a wallet identifier similar to ADA handles but instead of NFTs representing the nickname it will be the datum attached to a UTxO inside a smart contract. There are many types of data structures inside the cogno ecosystem. Each with their own scope and use case. The primary use case of this contract is for reference. This contract will contain public wallet information for some ecosystems within Cardano. The table of contents below contains links for further information.
 
+## Table of Contents
 
-## Use
+[Cogno](#cogno)
 
-A user is always in control of their cognomen. A user may update or remove their cogno at anytime as long as their public key hash is present inside the transaction. Other users may give kudos to a cogno at any time to show praise for some account. The cogno is designed to hold many familiar social media profile-related data such as contact information or an image for the cogno. There is a minimum ada threshold to use some of the endpoints. This is to ensure there is always enough ada on the UTxO for whatever cogno data may be present and that each cogno has skin in the game via a refundable ada deposit. The minimum value is currently set to 10 ADA for testing.
+[Tag](#tag)
 
-The primary use case of this contract is for reference. This contract will contain wallet information for some ecosystem within Cardano.
+[Rank](#rank)
+
+[Oracle](#oracle)
+
+[Royalty](#royalty)
+
+# Cogno
+
+A user is always in control of their cognomen. A user may update or remove their cogno at anytime as long as their public key hash is present inside the removal transaction. Other users may give kudos to a cogno at any time to show praise. The cogno is designed to hold many familiar social media profile-related data such as contact information or a profile image. There is a minimum ADA threshold to use some of the endpoints. This is to ensure there is always enough ADA on the UTxO for whatever cogno data may be present inside a transaction. This minimum ADA can also act like a cogno's skin in the game via a refundable ADA deposit. The minimum value is currently set to 10 ADA for testing.
 
 ## The basic Cogno
 
-A wallet will create a Cogno by supplying a payment public key hash, a staking credential, and a cognomen. A user may choose to update their Cogno to include a cogno image, some more details about their Cogno, and their locale.
-
+A wallet will create a Cogno by supplying a payment public key hash, a staking credential, and a cognomen. A user may choose to update their Cogno to include a cogno image, some more details about their Cogno, and their locale. The only required data is the pub key hash.
 
 ```hs
 data CognoData = CognoData
   { cdPkh    :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the cogno.
+  -- ^ The required public key hash of the cogno.
   , cdSc     :: PlutusV2.PubKeyHash
   -- ^ The stake hash of the cogno.
   , cdKudos  :: Integer
@@ -65,7 +57,7 @@ This is all the information required to identify a wallet address with a cognome
 
 ## Use Case
 
-When a wallet address is queried, the wallet address can be cross reference with datum data from this contract to relay information about that specific wallet. This behaves very similarly to already existing NFT based identification but the key difference is the updatable data and that it can be referenced on-chain. Smart contracts will now have the ability to reference a wallets Cogno and use that data in on-chain validation functions.
+When a wallet address is queried on some website, that wallet address can now be cross reference with cogno datum data from this contract to relay information about that specific wallet back to the website. This behaves very similarly to already existing NFT-based identification system but the key difference is the updatable data and that it can be referenced on-chain. Smart contracts will now have the ability to reference a cogno and use that data in on-chain validation functions.
 
 [Back To Top](#table-of-contents)
 
@@ -89,6 +81,7 @@ data TagData = TagData
   -- ^ The Index of the quote tag.
   }
 ```
+
 The user may decide to remove the tag after tagging or they may just update an already existing tag with a new message. The message is permanent and available to all on the blockchain.
 
 Another user may see a tag and quote it in their own tag. This type of tag referencing is very similar to commenting to someone elses message on social media. The type of quoting system allows for a direct pointer to the UTxO of a previous tag, allowing for dynamic connections to made while all being referencable on-chain.
@@ -101,13 +94,13 @@ Tagging the chain with messages can work as a social media dApp or as a data agg
 
 ![Cogno connecting with a Tag](./images/cogno-tag-connection.png)
 
-There are many cogno and many tags but the connections between them reveal a wallet profile that can be shown off-chain. The connection displayed above by the yellow arrows indicate a network betwen a cogno, a tag, and a quoted tag. This information may be used to relay the cogno information for a frontend website to use.
+There are many cogno and many tags but the connections between them reveal a wallet profile that can be shown off-chain. The connection displayed above by the yellow arrows indicate a network betwen a cogno, a tag, and a quoted tag. This information may be used to relay the cogno information for a website to use.
 
 [Back To Top](#table-of-contents)
 
 # Rank
 
-The rank datas structure provides the means for a Cogno to acquire upvotes and downvotes but applied to a specific rank use case, a rank type. A Cogno may have many rank structures attach to it, providing rank information for many different ecosystems within Cardano. Each rank is connected to a Cogno via the tx hash and index. This means when a Cogno is updated the connected rank datums need to be updated too. 
+The rank data structure provides the means for a Cogno to acquire upvotes and downvotes but applied to a specific rank use case, a rank type. A Cogno may have many rank structures attach to it, providing rank information for many different ecosystems within Cardano. Each rank is connected to a Cogno via the txId info. This does imply that when a Cogno is updated, any connected rank datums need to be updated too. 
 
 ```hs
 data RankData = RankData
@@ -130,24 +123,24 @@ data RankData = RankData
   }
 ```
 
-The user can always remove a rank from the contract just like a Cogno or tag. The only user-updatable parameter is the Cogno transaction information. The goal is keeping a rank for a long time so trust may be built up. This is why there is an age parameter that should remain constant from the initial value. The up an down voting of a rank is open to all. This will be improved in the future but the basic implementation exists. The rank type is a designation flag for which ecosystem this rank applies too. Many groups may need some form of user ranking so creating a global rank system here just doesn't make sense. This allows for more granular control over one's own Cogno.
+The user can always remove a rank from the contract just like a Cogno or tag. The only user-updatable parameter is the Cogno transaction information. The goal is keeping a rank for a long time so trust may be built up. This is why there is an age parameter that should remain constant from the initial value. The up and down voting of a rank is open to all. This will be improved in the future but the basic implementation exists. The rank type is a designation flag for which ecosystem this rank applies. Many groups may need some form of user ranking so creating a global rank system here just doesn't make sense. This allows for more granular control over one's own Cogno.
 
 ## Use Case
 
-A user may have a cogno that represents a profile in some Cardano ecosystem. Within this ecosystem, their exists a ranking system that determines what a user can and can not do inside the ecosystem. This ranking system can be represented by a rank data attached to a Cogno. A positive action may result in an upvote while a negative action may result in a downvote. This may seem fairly restrictive but if an ecosystem requires permission-based smart contract interactions then this type of datum interaction is imperative.
+A user may have a cogno that represents a profile in some Cardano ecosystem. Within this ecosystem, their exists a ranking system that determines what a user can and can not do inside the ecosystem. This ranking system can be represented by a rank data attached to a Cogno. A positive action may result in an upvote while a negative action may result in a downvote. This may seem fairly restrictive but if an ecosystem requires permission-based smart contract interactions then this type of rank datum interaction is imperative.
 
 ![Cogno connecting with a Rank](./images/cogno-rank-connection.png)
 
 
-Another use may be attach rank to an arbitrary UTxO, like a tag, in which user may cast an up or down vote. The datum is designed to hold the tx information of just a Cogno but the data is formatted for any tx information so as long as the off-chain handles the referencing correctly it may be used to represent whatever the user wants. In the tag example, it would act like up and down votes on a social media post. The tx that is being referenced can also be from another smart contract, allowing the rank to represent the outcome of a public vote. The possiblities are almost endless.
+Another use case for the rank data is attaching it to an arbitrary UTxO, like a tag, in which users may cast an up or down vote. The datum is designed to hold the tx information of just a Cogno but the data is formatted for any tx information so as long as the off-chain handles the referencing correctly it may be used to represent whatever the user wants. In the tag example, it would act like up and down votes on a social media post. The tx that is being referenced can also be from another smart contract, allowing the rank to represent the outcome of a public vote. The possiblities are almost endless.
 
 [Back To Top](#table-of-contents)
 
 # Oracle
 
-A data structure designed to hold price conversion ratios between cardano native assets. Each UTxO will represent a data stream of prices between two tokens. The source of the data stream may be found with the cogno connection. For example ,some dex may provide the data feed for the oracle data. Their cogno would be their dex profile, displaying information about the oracle data.
+A data structure designed to hold price conversion ratios between Cardano native assets. Each UTxO will represent a data stream of prices between two tokens. The source of the data stream may have a cogno connection. For example, some dex may provide the data feed for the oracle data. Their cogno would be their dex profile, displaying information about the oracle data feed.
 
-The data itself may either remain on the UTxO for future use, like time-averaging based-off the age parameter, or exchange specific data, or the entire utxo may be updated into the new data state. This is source dependent and left up for the data feed or oracle provider.
+The data itself may either remain on the UTxO for future use, like time-averaging based-off the age parameter, or exchange specific data via cogno reference, or the entire utxo may be updated into the new data state. This is source dependent and left up for the data feed or oracle provider.
 
 ```hs
 data OracleData = OracleData
@@ -156,17 +149,17 @@ data OracleData = OracleData
   , oSc         :: PlutusV2.PubKeyHash
   -- ^ The stake hash of the oracle.
   , oInPid      :: PlutusV2.CurrencySymbol
-  -- ^ The incoming pid
+  -- ^ The incoming token pid.
   , oInTkn      :: PlutusV2.TokenName
-  -- ^ The incoming token name
+  -- ^ The incoming token name.
   , oInAmt      :: Integer
-  -- ^ The incoming token amount
+  -- ^ The incoming token amount.
   , oOutPid     :: PlutusV2.CurrencySymbol
-  -- ^ The outgoing pid
+  -- ^ The outgoing ptoken pid.
   , oOutTkn     :: PlutusV2.TokenName
-  -- ^ The outgoing token name
+  -- ^ The outgoing token name.
   , oOutAmt     :: Integer
-  -- ^ The outgoing amount
+  -- ^ The outgoing amount.
   , oAge        :: Integer
   -- ^ The age of the data.
   , oCognoTxId  :: PlutusV2.BuiltinByteString
@@ -178,13 +171,38 @@ data OracleData = OracleData
 
 ## Use Case
 
-The key use case for the oracle data is providing an on-chain data feed of price data from decentralized exchanges that are trading pairs of cardano native assets. A real example is Sundaeswap price api, providing a data feed for the oracle data used in token to token swaps.
+The key use case for the oracle data is providing an on-chain data feed of price data from decentralized exchanges that are trading pairs of Cardano native assets. A real example is Sundaeswap price api, providing a data feed for the oracle data used in smart contracts handling token to token swaps.
 
 ![Cogno connecting with an Oracle](./images/cogno-oracle-connection.png)
 
 [Back To Top](#table-of-contents)
 
-# Address to PubKeyHash Example
+# Royalty
+
+```hs
+data RoyaltyData = RoyaltyData
+  { rPkhs   :: [PlutusV2.PubKeyHash]
+  -- ^ The list of all royalty receiving public key hashes.
+  , rScs    :: [PlutusV2.PubKeyHash]
+  -- ^ The list of all royalty stake key hashes.
+  , rInPid  :: PlutusV2.CurrencySymbol
+  -- ^ The policy id for applying the royalty.
+  , rInTkn  :: PlutusV2.TokenName
+  -- ^ The token name for applying the royalty.
+  , rRate   :: Integer
+  -- ^ The royalty rate for the token.
+  , rOutPid :: PlutusV2.CurrencySymbol
+  -- ^ The policy id of the royalty payout.
+  , rOutTkn :: PlutusV2.TokenName
+  -- ^ The token name of the royalty payout.
+  , rThres  :: Integer
+  -- ^ The multisig threshold.
+  }
+```
+
+[Back To Top](#table-of-contents)
+
+### Address to PubKeyHash Example
 
 Obtaining the PubKeyHash format for the datum from a base address is rather easy. Assume the wallet address is
 

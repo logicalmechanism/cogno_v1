@@ -30,10 +30,25 @@ module HelperFunctions
   , isNInputs
   , isNOutputs
   , createAddress
+  , checkMultisig
   ) where
 import           PlutusTx.Prelude 
 import           Plutus.V1.Ledger.Credential
 import qualified Plutus.V2.Ledger.Api        as PlutusV2
+import qualified Plutus.V2.Ledger.Contexts   as ContextsV2
+-------------------------------------------------------------------------------
+-- | A simple multisig.
+-------------------------------------------------------------------------------
+checkMultisig :: PlutusV2.TxInfo -> [PlutusV2.PubKeyHash] -> Integer -> Bool
+checkMultisig txInfo pkhs threshold = loopSigs pkhs 0
+  where
+    loopSigs :: [PlutusV2.PubKeyHash] -> Integer  -> Bool
+    loopSigs []     counter = counter >= threshold
+    loopSigs (x:xs) counter = 
+      if ContextsV2.txSignedBy txInfo x
+        then loopSigs xs (counter + 1)
+        else loopSigs xs counter
+
 -------------------------------------------------------------------------
 -- | Create a proper Address type.
 -------------------------------------------------------------------------

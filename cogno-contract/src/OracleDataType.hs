@@ -38,7 +38,6 @@ module OracleDataType
   , oAge
   , oCognoTxId
   , oCognoIndex
-  , testData
   , getInPriceConversion
   , getOutPriceConversion
   , updateOracleData
@@ -75,22 +74,6 @@ data OracleData = OracleData
   -- ^ The Index of the TxId of the congo connected to this oracle.
   }
 PlutusTx.unstableMakeIsData ''OracleData
-
-
-testData :: OracleData
-testData = OracleData
-  { oPkh        = ""
-  , oSc         = ""
-  , oInPid      = "af2e27f580f7f08e93190a81f72462f153026d06450924726645891b"
-  , oInTkn      = "44524950"
-  , oInAmt      = 741636485 -- drip
-  , oOutPid     = ""
-  , oOutTkn     = ""
-  , oOutAmt     = 1000000 -- ada
-  , oAge        = 0
-  , oCognoTxId  = ""
-  , oCognoIndex = 0
-  }
 
 
 -- only the in / out amts and cogno data may change. The age must greater or equal to its current value.
