@@ -50,6 +50,7 @@ library
                         TagDataType
                         RankDataType
                         OracleDataType
+                        RoyaltyDataType
                         HelperFunctions
 
   build-depends:        bytestring

@@ -44,6 +44,7 @@ import           CognoDataType
 import           TagDataType
 import           RankDataType
 import           OracleDataType
+import           RoyaltyDataType
 import           HelperFunctions
 {- |
   Author   : The Ancient Kraken
@@ -62,16 +63,17 @@ import           HelperFunctions
 -------------------------------------------------------------------------------
 -- | Create the datum type.
 -------------------------------------------------------------------------------
-data CustomDatumType = Cogno  CognoData  |
-                       Tag    TagData    |
-                       Rank   RankData   |
-                       Oracle OracleData 
-PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno,  0 )
-                                             , ( 'Tag,    1 )
-                                             , ( 'Rank,   2 )
-                                             , ( 'Oracle, 3 )
+data CustomDatumType = Cogno   CognoData   |
+                       Tag     TagData     |
+                       Rank    RankData    |
+                       Oracle  OracleData  |
+                       Royalty RoyaltyData 
+PlutusTx.makeIsDataIndexed ''CustomDatumType [ ( 'Cogno,   0 )
+                                             , ( 'Tag,     1 )
+                                             , ( 'Rank,    2 )
+                                             , ( 'Oracle,  3 )
+                                             , ( 'Royalty, 4 )
                                              ]
-
 -------------------------------------------------------------------------------
 -- | Create the redeemer type.
 -------------------------------------------------------------------------------
@@ -91,6 +93,40 @@ PlutusTx.makeIsDataIndexed ''CustomRedeemerType [ ( 'Remove,  0 )
 mkValidator :: CustomDatumType -> CustomRedeemerType -> PlutusV2.ScriptContext -> Bool
 mkValidator datum redeemer context =
   case datum of
+    {- | The royalty state
+
+      Any and all royalty validation logic will be here.
+
+    -}
+    (Royalty rd) ->
+      let userPkhs = rPkhs rd
+      in case redeemer of
+        -- remove utxo from the contract and send it out
+        Remove -> do
+          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0 -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"   $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
+          ;         traceIfFalse "Rank Remove Error" $ all (==(True :: Bool)) [a,b]
+          }
+        
+        -- update the utxo datum and send the utxo back to the contract
+        Update ->
+          case getOutboundDatum contTxOutputs validatingValue of
+            Nothing            -> False
+            Just outboundDatum ->
+              case outboundDatum of
+                ( Royalty rd' ) -> do
+                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"   $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"   $ updateRoyaltyData rd rd'                           -- the datum changes correctly
+                  ;         traceIfFalse "Rank Update Error" $ all (==(True :: Bool)) [a,b,c]
+                  }
+
+                -- only royalty datum
+                _ -> False
+        
+        -- only remove or update redeemers
+        _ -> False
+
     {- | The oracle state
 
       Any and all oracle validation logic will be here.
