@@ -39,7 +39,7 @@ module RoyaltyDataType
   ) where
 import qualified PlutusTx
 import           PlutusTx.Prelude
-import qualified Plutus.V2.Ledger.Api   as PlutusV2
+import qualified Plutus.V2.Ledger.Api as PlutusV2
 -------------------------------------------------------------------------------
 -- | Create the RoyaltyData object.
 -------------------------------------------------------------------------------

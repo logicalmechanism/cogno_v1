@@ -19,3 +19,13 @@ Rank
     - Update
     - Upvote
     - Downvote
+
+Oracle
+    - Create
+    - Remove
+    - Update
+
+Royalty
+    - Create
+    - Remove
+    - Update

@@ -103,9 +103,9 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract and send it out
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0 -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"   $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
-          ;         traceIfFalse "Rank Remove Error" $ all (==(True :: Bool)) [a,b]
+          { let a = traceIfFalse "Incorrect In/Out"     $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0 -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"      $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
+          ;         traceIfFalse "Royalty Remove Error" $ all (==(True :: Bool)) [a,b]
           }
         
         -- update the utxo datum and send the utxo back to the contract
@@ -115,10 +115,10 @@ mkValidator datum redeemer context =
             Just outboundDatum ->
               case outboundDatum of
                 ( Royalty rd' ) -> do
-                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
-                  ; let b = traceIfFalse "Wrong Tx Signer"   $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
-                  ; let c = traceIfFalse "Incorrect Datum"   $ updateRoyaltyData rd rd'                           -- the datum changes correctly
-                  ;         traceIfFalse "Rank Update Error" $ all (==(True :: Bool)) [a,b,c]
+                  { let a = traceIfFalse "Incorrect In/Out"     $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"      $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"      $ updateRoyaltyData rd rd'                           -- the datum changes correctly
+                  ;         traceIfFalse "Royalty Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
 
                 -- only royalty datum
@@ -138,10 +138,10 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract and send to user's address
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
-          ; let c = traceIfFalse "Value Not Paid"    $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
-          ;         traceIfFalse "Rank Remove Error" $ all (==(True :: Bool)) [a,b,c]
+          { let a = traceIfFalse "Incorrect In/Out"    $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"     $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"      $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          ;         traceIfFalse "Oracle Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
         
         -- update the utxo datum and send the utxo back to the contract
@@ -151,10 +151,10 @@ mkValidator datum redeemer context =
             Just outboundDatum ->
               case outboundDatum of
                 ( Oracle od' ) -> do
-                  { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
-                  ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
-                  ; let c = traceIfFalse "Incorrect Datum"   $ updateOracleData od od'                            -- the datum changes correctly
-                  ;         traceIfFalse "Rank Update Error" $ all (==(True :: Bool)) [a,b,c]
+                  { let a = traceIfFalse "Incorrect In/Out"    $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
+                  ; let b = traceIfFalse "Wrong Tx Signer"     $ ContextsV2.txSignedBy info userPkh                 -- wallet must sign it
+                  ; let c = traceIfFalse "Incorrect Datum"     $ updateOracleData od od'                            -- the datum changes correctly
+                  ;         traceIfFalse "Oracle Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
 
                 -- only oracle datum
