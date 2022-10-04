@@ -179,6 +179,12 @@ The key use case for the oracle data is providing an on-chain data feed of price
 
 # Royalty
 
+The royalty data type is slightly different than the other cogno-related data types. The data relates royalty payout information by connecting to a policy id and token name instead of a cogno profile. It may be used to reference the royalty rate and the list of payout addresses associated with the royalty. The royalty has the ability to determine the preferred payout token, allowing royalty payouts to occur in royalty group's favorite token.
+
+The data structure is built to handle groups via a list of keys and a threshold vote parameter. The endpoints on this data type are all multisig agreements with everyone in the royalty group. This means even removing the royalty has to be a group decision. This may be trouble for some set ups but it does allow some security knowing that not all the variables can be destroyed for the gains of a singular user. 
+
+Each UTxO for a group is for a single policy id and token name. If there happen to be many tokens on a policy id that all have the same royalty rate then the token name may be left blank to indicate its policy base only. But if finer control is required then a token by token style royalty system can be built with this style of data.
+
 ```hs
 data RoyaltyData = RoyaltyData
   { rPkhs   :: [PlutusV2.PubKeyHash]

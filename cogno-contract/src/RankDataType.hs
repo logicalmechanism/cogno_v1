@@ -26,15 +26,7 @@
 {-# OPTIONS_GHC -fno-specialise               #-}
 {-# OPTIONS_GHC -fexpose-all-unfoldings       #-}
 module RankDataType
-  ( RankData
-  , rPkh
-  , rSc
-  , rUpVote
-  , rDownVote
-  , rAge
-  , rCognoTxId
-  , rCognoIndex
-  , rType
+  ( RankData (..)
   , checkForUpVote
   , checkForDownVote
   , checkForNewCogno

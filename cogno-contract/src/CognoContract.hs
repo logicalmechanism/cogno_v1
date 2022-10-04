@@ -45,7 +45,7 @@ import           TagDataType
 import           RankDataType
 import           OracleDataType
 import           RoyaltyDataType
-import           HelperFunctions
+import           UsefulFuncs
 {- |
   Author   : The Ancient Kraken
   Copyright: 2022
@@ -60,6 +60,12 @@ import           HelperFunctions
 
   The Glorious Glasgow Haskell Compilation System, version 8.10.7
 -}
+-- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
+thresholdLovelace :: Integer
+thresholdLovelace = 10000000
+
+minimumValue :: PlutusV2.Value
+minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace
 -------------------------------------------------------------------------------
 -- | Create the datum type.
 -------------------------------------------------------------------------------
@@ -104,7 +110,7 @@ mkValidator datum redeemer context =
         -- remove utxo from the contract and send it out
         Remove -> do
           { let a = traceIfFalse "Incorrect In/Out"     $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0 -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"      $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
+          ; let b = traceIfFalse "Wrong Tx Signer"      $ checkValidMultisig info userPkhs (rThres rd)       -- wallet must sign it
           ;         traceIfFalse "Royalty Remove Error" $ all (==(True :: Bool)) [a,b]
           }
         
@@ -116,7 +122,7 @@ mkValidator datum redeemer context =
               case outboundDatum of
                 ( Royalty rd' ) -> do
                   { let a = traceIfFalse "Incorrect In/Out"     $ isNInputs txInputs 1 && isNOutputs contTxOutputs 1 -- single input single output
-                  ; let b = traceIfFalse "Wrong Tx Signer"      $ checkMultisig info userPkhs (rThres rd)            -- wallet must sign it
+                  ; let b = traceIfFalse "Wrong Tx Signer"      $ checkValidMultisig info userPkhs (rThres rd)            -- wallet must sign it
                   ; let c = traceIfFalse "Incorrect Datum"      $ updateRoyaltyData rd rd'                           -- the datum changes correctly
                   ;         traceIfFalse "Royalty Update Error" $ all (==(True :: Bool)) [a,b,c]
                   }
@@ -138,9 +144,9 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract and send to user's address
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out"    $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"     $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
-          ; let c = traceIfFalse "Value Not Paid"      $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          { let a = traceIfFalse "Incorrect In/Out"    $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0          -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"     $ ContextsV2.txSignedBy info userPkh                          -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"      $ isAddrGettingPaidExactly txOutputs userAddr validatingValue -- send back the leftover
           ;         traceIfFalse "Oracle Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
         
@@ -174,9 +180,9 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract and send to user's address
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
-          ; let c = traceIfFalse "Value Not Paid"    $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          { let a = traceIfFalse "Incorrect In/Out"  $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0          -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"   $ ContextsV2.txSignedBy info userPkh                          -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"    $ isAddrGettingPaidExactly txOutputs userAddr validatingValue -- send back the leftover
           ;         traceIfFalse "Rank Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
         
@@ -239,9 +245,9 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract and send to user's address
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
-          ; let c = traceIfFalse "Value Not Paid"   $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          { let a = traceIfFalse "Incorrect In/Out" $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0          -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"  $ ContextsV2.txSignedBy info userPkh                          -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"   $ isAddrGettingPaidExactly txOutputs userAddr validatingValue -- send back the leftover
           ;         traceIfFalse "Tag Remove Error" $ all (==(True :: Bool)) [a,b,c]
           }
         
@@ -275,9 +281,9 @@ mkValidator datum redeemer context =
       in case redeemer of
         -- remove utxo from the contract and send it back to the user's address
         Remove -> do
-          { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0   -- single input no outputs
-          ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                   -- wallet must sign it
-          ; let c = traceIfFalse "Value Not Paid"     $ isAddrGettingPaid txOutputs userAddr validatingValue -- send back the leftover
+          { let a = traceIfFalse "Incorrect In/Out"   $ isNInputs txInputs 1 && isNOutputs contTxOutputs 0          -- single input no outputs
+          ; let b = traceIfFalse "Wrong Tx Signer"    $ ContextsV2.txSignedBy info userPkh                          -- wallet must sign it
+          ; let c = traceIfFalse "Value Not Paid"     $ isAddrGettingPaidExactly txOutputs userAddr validatingValue -- send back the leftover
           ;         traceIfFalse "Cogno Remove Error" $ all (==True) [a,b,c]
           }
 
@@ -338,13 +344,6 @@ mkValidator datum redeemer context =
       case ContextsV2.findOwnInput context of
         Nothing    -> traceError "" -- This error should never be hit.
         Just input -> PlutusV2.txOutValue $ PlutusV2.txInInfoResolved input
-    
-    -- | The minimum value of ADA in a wallet to update a cogno. 10 ADA
-    thresholdLovelace :: Integer
-    thresholdLovelace = 10000000
-
-    minimumValue :: PlutusV2.Value
-    minimumValue = Value.singleton Value.adaSymbol Value.adaToken thresholdLovelace
     
     -- | Get the inline datum that holds a value from a list of tx outs.
     getOutboundDatum :: [PlutusV2.TxOut] -> PlutusV2.Value -> Maybe CustomDatumType

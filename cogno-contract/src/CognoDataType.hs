@@ -26,14 +26,7 @@
 {-# OPTIONS_GHC -fno-specialise               #-}
 {-# OPTIONS_GHC -fexpose-all-unfoldings       #-}
 module CognoDataType
-  ( CognoData
-  , cdPkh
-  , cdSc
-  , cdKudos
-  , cdCogno
-  , cdImage
-  , cdDetail
-  , cdLocale
+  ( CognoData (..)
   , updateCognoData
   , giveAKudo
   ) where

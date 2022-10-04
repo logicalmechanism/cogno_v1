@@ -26,13 +26,7 @@
 {-# OPTIONS_GHC -fno-specialise               #-}
 {-# OPTIONS_GHC -fexpose-all-unfoldings       #-}
 module TagDataType
-  ( TagData
-  , tPkh
-  , tSc
-  , tTag
-  , tDetail
-  , tQuoteTxId
-  , tQuoteIndex
+  ( TagData (..)
   , updateTagData
   ) where
 import qualified PlutusTx
