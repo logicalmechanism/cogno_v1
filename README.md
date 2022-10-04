@@ -24,6 +24,8 @@ A smart contract for UTxO-based cognomens. Each UTxO is a wallet identifier simi
 
 [Oracle](#oracle)
 
+[Royalty](#royalty)
+
 # Cogno
 
 A user is always in control of their cognomen. A user may update or remove their cogno at anytime as long as their public key hash is present inside the removal transaction. Other users may give kudos to a cogno at any time to show praise. The cogno is designed to hold many familiar social media profile-related data such as contact information or a profile image. There is a minimum ADA threshold to use some of the endpoints. This is to ensure there is always enough ADA on the UTxO for whatever cogno data may be present inside a transaction. This minimum ADA can also act like a cogno's skin in the game via a refundable ADA deposit. The minimum value is currently set to 10 ADA for testing.
@@ -172,6 +174,37 @@ data OracleData = OracleData
 The key use case for the oracle data is providing an on-chain data feed of price data from decentralized exchanges that are trading pairs of Cardano native assets. A real example is Sundaeswap price api, providing a data feed for the oracle data used in smart contracts handling token to token swaps.
 
 ![Cogno connecting with an Oracle](./images/cogno-oracle-connection.png)
+
+[Back To Top](#table-of-contents)
+
+# Royalty
+
+The royalty data type is slightly different than the other cogno-related data types. The data relates royalty payout information by connecting to a policy id and token name instead of a cogno profile. It may be used to reference the royalty rate and the list of payout addresses associated with the royalty. The royalty has the ability to determine the preferred payout token, allowing royalty payouts to occur in royalty group's favorite token.
+
+The data structure is built to handle groups via a list of keys and a threshold vote parameter. The endpoints on this data type are all multisig agreements with everyone in the royalty group. This means even removing the royalty has to be a group decision. This may be trouble for some set ups but it does allow some security knowing that not all the variables can be destroyed for the gains of a singular user. 
+
+Each UTxO for a group is for a single policy id and token name. If there happen to be many tokens on a policy id that all have the same royalty rate then the token name may be left blank to indicate its policy base only. But if finer control is required then a token by token style royalty system can be built with this style of data.
+
+```hs
+data RoyaltyData = RoyaltyData
+  { rPkhs   :: [PlutusV2.PubKeyHash]
+  -- ^ The list of all royalty receiving public key hashes.
+  , rScs    :: [PlutusV2.PubKeyHash]
+  -- ^ The list of all royalty stake key hashes.
+  , rInPid  :: PlutusV2.CurrencySymbol
+  -- ^ The policy id for applying the royalty.
+  , rInTkn  :: PlutusV2.TokenName
+  -- ^ The token name for applying the royalty.
+  , rRate   :: Integer
+  -- ^ The royalty rate for the token.
+  , rOutPid :: PlutusV2.CurrencySymbol
+  -- ^ The policy id of the royalty payout.
+  , rOutTkn :: PlutusV2.TokenName
+  -- ^ The token name of the royalty payout.
+  , rThres  :: Integer
+  -- ^ The multisig threshold.
+  }
+```
 
 [Back To Top](#table-of-contents)
 

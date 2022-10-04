@@ -50,7 +50,7 @@ library
                         TagDataType
                         RankDataType
                         OracleDataType
-                        HelperFunctions
+                        RoyaltyDataType
 
   build-depends:        bytestring
                       , cardano-api
@@ -59,6 +59,7 @@ library
                       , plutus-tx-plugin
                       , plutus-script-utils
                       , serialise
+                      , useful-funcs
 
   ghc-options: -fobject-code -fno-ignore-interface-pragmas -fno-omit-interface-pragmas
 

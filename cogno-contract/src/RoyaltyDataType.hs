@@ -25,33 +25,48 @@
 {-# OPTIONS_GHC -fobject-code                 #-}
 {-# OPTIONS_GHC -fno-specialise               #-}
 {-# OPTIONS_GHC -fexpose-all-unfoldings       #-}
-module TagDataType
-  ( TagData (..)
-  , updateTagData
+module RoyaltyDataType
+  ( updateRoyaltyData
+  , RoyaltyData
+  , rPkhs
+  , rScs
+  , rInPid
+  , rInTkn
+  , rRate
+  , rOutPid
+  , rOutTkn
+  , rThres
   ) where
 import qualified PlutusTx
 import           PlutusTx.Prelude
 import qualified Plutus.V2.Ledger.Api as PlutusV2
 -------------------------------------------------------------------------------
--- | Create the tag data object.
+-- | Create the RoyaltyData object.
 -------------------------------------------------------------------------------
-data TagData = TagData
-  { tPkh    :: PlutusV2.PubKeyHash
-  -- ^ The public key hash of the tagger.
-  , tSc     :: PlutusV2.PubKeyHash
-  -- ^ The stake hash of the tagger.
-  , tTag    :: PlutusV2.BuiltinByteString
-  -- ^ The actual tag.
-  , tDetail :: [PlutusV2.BuiltinByteString]
-  -- ^ The details of the tag.
-  , tQuoteTxId :: PlutusV2.BuiltinByteString
-  -- ^ The TxId of the quote tag.
-  , tQuoteIndex :: Integer
-  -- ^ The Index of the quote tag.
+data RoyaltyData = RoyaltyData
+  { rPkhs   :: [PlutusV2.PubKeyHash]
+  -- ^ The list of all royalty receiving public key hashes.
+  , rScs    :: [PlutusV2.PubKeyHash]
+  -- ^ The list of all royalty stake key hashes.
+  , rInPid  :: PlutusV2.CurrencySymbol
+  -- ^ The policy id for applying the royalty.
+  , rInTkn  :: PlutusV2.TokenName
+  -- ^ The token name for applying the royalty.
+  , rRate   :: Integer
+  -- ^ The royalty rate for the token.
+  , rOutPid :: PlutusV2.CurrencySymbol
+  -- ^ The policy id of the royalty payout.
+  , rOutTkn :: PlutusV2.TokenName
+  -- ^ The token name of the royalty payout.
+  , rThres  :: Integer
+  -- ^ The multisig threshold.
   }
-PlutusTx.unstableMakeIsData ''TagData
+PlutusTx.unstableMakeIsData ''RoyaltyData
 
--- Owner must not change
-updateTagData :: TagData -> TagData -> Bool
-updateTagData a b = ( tPkh a == tPkh b ) &&
-                    ( tSc  a == tSc  b )
+-- The group, token, and threshold are constant but the rate and payout token can change.
+updateRoyaltyData :: RoyaltyData -> RoyaltyData -> Bool
+updateRoyaltyData a b = ( rPkhs  a == rPkhs  b ) &&
+                        ( rScs   a == rScs   b ) &&
+                        ( rInPid a == rInPid b ) &&
+                        ( rInTkn a == rInTkn b ) &&
+                        ( rThres a == rThres b )

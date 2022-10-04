@@ -26,18 +26,7 @@
 {-# OPTIONS_GHC -fno-specialise               #-}
 {-# OPTIONS_GHC -fexpose-all-unfoldings       #-}
 module OracleDataType
-  ( OracleData
-  , oPkh
-  , oSc
-  , oInPid
-  , oInTkn
-  , oInAmt
-  , oOutPid
-  , oOutTkn
-  , oOutAmt
-  , oAge
-  , oCognoTxId
-  , oCognoIndex
+  ( OracleData (..)
   , getInPriceConversion
   , getOutPriceConversion
   , updateOracleData
